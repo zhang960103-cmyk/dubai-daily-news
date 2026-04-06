@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 /**
- * 迪拜今日报 - 自动生成脚本
- * 运行环境: GitHub Actions (Node.js)
- * 功能: 调用 Anthropic API + web_search，生成早/晚新闻 JSON
+ * 迪拜今日报 - Auto-Generator
+ * Runs in GitHub Actions: Node.js 20, open internet
+ * Called by .github/workflows/daily.yml
  */
 
 const https = require('https');
@@ -12,28 +12,23 @@ const path = require('path');
 const API_KEY = process.env.ANTHROPIC_API_KEY;
 if (!API_KEY) { console.error('❌ ANTHROPIC_API_KEY not set'); process.exit(1); }
 
-// Dubai time = UTC+4
-const now = new Date();
-const dubaiHour = (now.getUTCHours() + 4) % 24;
-const dubaiDate = new Date(now.getTime() + 4 * 60 * 60 * 1000);
-const month = dubaiDate.getUTCMonth() + 1;
-const day = dubaiDate.getUTCDate();
-const year = dubaiDate.getUTCFullYear();
-const ds = `${month}月${day}日`;
-const dsEn = `${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+// Dubai = UTC+4
+const dubaiNow = new Date(Date.now() + 4 * 3600 * 1000);
+const month = dubaiNow.getUTCMonth() + 1;
+const day   = dubaiNow.getUTCDate();
+const year  = dubaiNow.getUTCFullYear();
+const ds    = `${month}月${day}日`;
+const dsEn  = `${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
 
-// Determine which editions to generate based on time
-// 2am UTC = 6am Dubai → morning
-// 5pm UTC = 9pm Dubai → evening
 const args = process.argv.slice(2);
-const editions = args.includes('morning') ? ['morning']
-               : args.includes('evening') ? ['evening']
-               : ['morning', 'evening']; // default: both
+const editions = args.length ? args : ['morning','evening'];
 
-console.log(`🕐 Dubai time: ${dubaiHour}:00 | Generating: ${editions.join(', ')}`);
+console.log(`🏙️  迪拜今日报 Auto-Generator`);
+console.log(`📅 Dubai Date: ${dsEn} (${ds})`);
+console.log(`📰 Editions: ${editions.join(', ')}`);
 
-// ── HTTP helper ──────────────────────────────────────────
-function callAPI(payload) {
+// ── HTTP helper ───────────────────────────────────────────
+function httpPost(payload, timeoutMs = 180000) {
   return new Promise((resolve, reject) => {
     const body = JSON.stringify(payload);
     const req = https.request({
@@ -47,13 +42,13 @@ function callAPI(payload) {
         'anthropic-version': '2023-06-01',
       }
     }, (res) => {
-      let data = '';
-      res.on('data', chunk => data += chunk);
+      const chunks = [];
+      res.on('data', c => chunks.push(c));
       res.on('end', () => {
         try {
-          const json = JSON.parse(data);
+          const json = JSON.parse(Buffer.concat(chunks).toString());
           if (res.statusCode !== 200) {
-            reject(new Error(`HTTP ${res.statusCode}: ${JSON.stringify(json?.error)}`));
+            reject(new Error(`HTTP ${res.statusCode}: ${json?.error?.message || JSON.stringify(json).slice(0,100)}`));
           } else {
             resolve(json);
           }
@@ -61,177 +56,141 @@ function callAPI(payload) {
       });
     });
     req.on('error', reject);
-    req.setTimeout(120000, () => { req.destroy(); reject(new Error('timeout')); });
+    req.setTimeout(timeoutMs, () => { req.destroy(); reject(new Error(`Timeout after ${timeoutMs}ms`)); });
     req.write(body);
     req.end();
   });
 }
 
-// ── Extract JSON from API response ───────────────────────
-function extractJSON(apiResponse) {
-  const txt = (apiResponse.content || [])
+// ── Parse JSON from AI response ───────────────────────────
+function extractJSON(apiResp) {
+  const allText = (apiResp.content || [])
     .filter(b => b.type === 'text')
     .map(b => b.text)
-    .join('')
-    .replace(/^```[a-z]*\n?/im, '')
-    .replace(/\n?```$/m, '')
-    .trim();
+    .join('');
 
-  const m = txt.match(/\{[\s\S]*\}/);
-  if (!m) throw new Error('No JSON found in response:\n' + txt.slice(0, 300));
-  return JSON.parse(m[0]);
+  // Strip markdown fences (``` or ```json)
+  let txt = allText.replace(/^```[a-z]*\r?\n?/im, '').replace(/\r?\n?```\s*$/m, '').trim();
+
+  // Find outermost JSON object
+  const start = txt.indexOf('{');
+  const end   = txt.lastIndexOf('}') + 1;
+  if (start < 0 || end <= start) {
+    throw new Error(`No JSON object found. Response: ${allText.slice(0, 300)}`);
+  }
+  return JSON.parse(txt.slice(start, end));
 }
 
-// ── MORNING PROMPT ───────────────────────────────────────
-function morningPrompt() {
-  return `Search the web for today's UAE and Dubai news (${dsEn}), then generate a Chinese-language morning briefing for Chinese residents in Dubai.
+// ── Build prompt ──────────────────────────────────────────
+function buildPrompt(edition) {
+  const isMorning = edition === 'morning';
+  const timeLabel = isMorning ? '早安' : '夜读';
+  const focus = isMorning
+    ? '今天出门前必须知道的事：政策福利、出行信息、战事简报、风险预警'
+    : '今天全天复盘：市场数据、战事汇总、深度分析、明日预判';
 
-Please search for:
-- "Dubai UAE news ${dsEn}"  
-- "UAE government ministry announcement ${dsEn}"
-- "Middle East war conflict ${dsEn}"
-- "Dubai police RTA DEWA announcement ${dsEn}"
+  return `请搜索今日阿联酋迪拜最新新闻（${dsEn}），为迪拜华人生成${timeLabel}简报。
 
-SELECTION RULES (strictly follow):
-1. MUST include: Middle East war/conflict with SPECIFIC details (parties, location, casualty numbers, latest development)
-2. MUST include: UAE government policy/benefit/free event for residents (MOE free market stalls, RTA new rules, visa policy, DEWA discounts etc)
-3. Include: Today's practical info (weather alert, traffic, events, health notices)
-4. Include: Property market news with specific numbers/areas
-5. Include: Risk warning (scam alert, legal change, safety notice)
-6. Be objective, include negative news, do not sugarcoat
-7. Every title MUST have specific: numbers, names, districts, amounts - NEVER vague
+搜索关键词：
+1. "UAE Dubai news ${dsEn}"
+2. "Dubai government announcement ${dsEn}"  
+3. "Middle East war conflict ${dsEn} casualties"
+4. "Dubai RTA MOE DEWA police ${dsEn}"
 
-Return ONLY valid JSON (no markdown, no backticks, no explanation):
+【核心定位】${focus}
+
+【选稿标准 - 严格执行】
+✅ 战事（必选）：具体交战方+地点+今日进展+数字，不能笼统
+✅ ${isMorning ? '政策福利（必选）：UAE机构今日公告/免费服务/优惠政策，含机构名和时间' : '市场数据（必选）：今日UAE或国际市场关键数据，含具体数字'}
+✅ 本地民生：直接影响迪拜居民日常生活的信息
+✅ 风险预警：诈骗/法律变化/安全事故（真实事件）
+✅ 负面新闻同等重要，不回避
+❌ 禁止笼统标题（如"迪拜经济持续增长"无数字则不写）
+❌ 禁止虚假信息，不确定的不写
+
+每条标题必须包含：具体数字/机构名/人名/地名/金额
+
+只返回纯JSON，不要用\`\`\`包裹，不要任何其他文字：
 {
-  "ready": true,
-  "generated_at": "${new Date().toISOString()}",
   "date": "${ds}",
   "date_en": "${dsEn}",
-  "edition": "morning",
+  "edition": "${edition}",
+  "ready": true,
+  "generated_at": "${new Date().toISOString()}",
   "news": [
-    {"emoji":"⚔️","category":"战事","title":"具体交战方+地点+今日最新进展含数字","summary":"核心战况及对迪拜能源/海运/汇率实际影响，35字","source":"媒体名","hot":true},
-    {"emoji":"🎁","category":"政策福利","title":"机构名+具体政策活动名+时间金额","summary":"受益对象、具体内容、如何参与，35字","source":"媒体名","hot":true},
-    {"emoji":"🚦","category":"本地生活","title":"今日出行/天气/活动/安全提示（具体路段或活动名）","summary":"35字内具体信息","source":"媒体名","hot":false},
-    {"emoji":"🏙️","category":"房产","title":"具体区域+数据或政策","summary":"35字","source":"媒体名","hot":false},
-    {"emoji":"⚠️","category":"风险预警","title":"具体诈骗/法律/安全风险事件","summary":"35字，含如何防范","source":"媒体名","hot":false},
-    {"emoji":"💼","category":"商业","title":"具体公司/行业+数据","summary":"35字","source":"媒体名","hot":false}
+    {"emoji":"⚔️","category":"战事","title":"【交战方】今日对【地点】【具体行动】，X人伤亡","summary":"战况对迪拜能源/海运/汇率实际量化影响，35字内","source":"来源媒体","hot":true},
+    {"emoji":"${isMorning?'🎁':'📊'}","category":"${isMorning?'政策福利':'商业'}","title":"${isMorning?'【机构名】宣布【具体政策/活动/金额/时间】':'【行业/指标】今日数据：X（含同比数字）'}","summary":"35字内","source":"来源媒体","hot":${isMorning?'true':'false'}},
+    {"emoji":"🚦","category":"本地生活","title":"今日迪拜【具体区域/设施/活动】信息","summary":"35字内","source":"来源媒体","hot":false},
+    {"emoji":"⚠️","category":"风险预警","title":"【机构】警告：【具体诈骗/法律/安全事件】","summary":"防范方法35字内","source":"来源媒体","hot":false},
+    {"emoji":"🏙️","category":"房产","title":"【区域/楼盘】${isMorning?'成交/政策':'今日成交'}（含具体数字）","summary":"35字内","source":"来源媒体","hot":false},
+    {"emoji":"${isMorning?'💼':'🎓'}","category":"${isMorning?'商业':'教育'}","title":"【具体公司/机构】【事件+数字】","summary":"35字内","source":"来源媒体","hot":false}
   ],
   "zhishi": [
-    "【政策解读】今日最重要政策/活动的完整操作指引，含申请方式、时间地点、适用人群，60字",
-    "【战事深度】此轮冲突的根源、当前局势、对迪拜能源价格/物流成本/人民币汇率的量化影响，60字",
-    "【早间必做】今日迪拜华人最应立即行动的一件事及理由，60字"
+    "${isMorning?'【政策操作】今日最值得华人行动的政策/福利完整操作指引（含时间地点申请方式），60字':'【今日复盘】今天最重要事件的背景和深层逻辑，适合深度思考，60字'}",
+    "【战事影响】此次冲突对迪拜能源价格/物流成本/汇率的具体量化影响，60字",
+    "${isMorning?'【早间必做】今天出门前最应做的一件具体事及步骤，60字':'【明日预判】基于今日信息，明天值得重点关注的具体事项及原因，60字'}"
   ],
-  "ruiping": "早安锐评：直接点出今日最值得关注的矛盾或机遇，不绕弯子，迪拜华人视角，70字",
+  "ruiping": "${isMorning?'早安锐评：今日最值得关注的矛盾或机遇，直接点，不废话，华人视角，70字':'夜读锐评：今日最值得深思的一件事，有立场有温度，迪拜华人视角，睡前反思，80字'}",
   "money_tips": [
-    "💡【今日机会】基于今日新闻最值得今天就行动的具体事项，40字",
-    "💡【风险规避】今日需要注意的具体坑或法律风险，40字",
-    "💡【布局信号】今日新闻透露的中期投资或商业机会，40字"
+    "💡【${isMorning?'今日行动':'今日信号'}】${isMorning?'今天就能做的具体事含操作步骤':'今天最重要的经济或政策信号华人如何利用'}，40字",
+    "💡【${isMorning?'规避坑':'明日行动'}】${isMorning?'今日需警惕的具体风险或法律边界':'基于今日复盘明天应做的具体事'}，40字",
+    "💡【${isMorning?'布局信号':'长线机会'}】今日信息透露的${isMorning?'3-6':'6-12'}个月内机会或风险，40字"
   ]
 }`;
 }
 
-// ── EVENING PROMPT ────────────────────────────────────────
-function eveningPrompt() {
-  return `Search the web for today's UAE and Dubai news recap (${dsEn}), then generate a Chinese-language evening briefing for Chinese residents in Dubai.
+// ── Generate one edition ───────────────────────────────────
+async function generateEdition(edition) {
+  console.log(`\n📰 Generating ${edition} edition...`);
 
-Please search for:
-- "Dubai UAE news today ${dsEn}"
-- "Dubai economy business market ${dsEn}"
-- "Middle East conflict war update ${dsEn}"
-- "UAE law regulation change ${dsEn}"
-
-SELECTION RULES:
-1. Recap what actually happened today - most important events with specifics
-2. Market/economic data from today (oil price, DXB property transactions, business news)
-3. War/conflict: full day summary with specific numbers
-4. Any new law, policy or regulation announced today
-5. Community-relevant: expat life, school, healthcare news
-6. Must include negative news - do not filter out criticism or problems
-7. Every title: specific numbers, names, locations, amounts
-
-Return ONLY valid JSON (no markdown, no backticks):
-{
-  "ready": true,
-  "generated_at": "${new Date().toISOString()}",
-  "date": "${ds}",
-  "date_en": "${dsEn}",
-  "edition": "evening",
-  "news": [
-    {"emoji":"⚔️","category":"战事","title":"今日战场全天汇总含具体伤亡数字和进展","summary":"今日最重要战事全天进展，35字","source":"媒体名","hot":true},
-    {"emoji":"📊","category":"商业","title":"今日市场/行业数据含具体数字","summary":"35字","source":"媒体名","hot":false},
-    {"emoji":"🏙️","category":"房产","title":"今日成交/政策/项目动态含数字","summary":"35字","source":"媒体名","hot":false},
-    {"emoji":"🎓","category":"教育","title":"KHDA/MOE/学校今日动态","summary":"35字","source":"媒体名","hot":false},
-    {"emoji":"🌆","category":"本地生活","title":"今日民生热点（物价/服务/活动）","summary":"35字","source":"媒体名","hot":false},
-    {"emoji":"⚠️","category":"风险预警","title":"今日曝出的风险/负面/法律变化","summary":"35字","source":"媒体名","hot":false}
-  ],
-  "zhishi": [
-    "【今日复盘】今天最重要事件的背景和深层逻辑，适合深度思考，60字",
-    "【明日预判】基于今日新闻，明天值得重点关注的事项，60字",
-    "【数据解读】今日最重要经济数据的含义及对华人居民的实际影响，60字"
-  ],
-  "ruiping": "夜读锐评：今日最值得深思的一件事，有立场有温度，适合睡前反思，迪拜华人视角，80字",
-  "money_tips": [
-    "💡【今日信号】今天最重要的经济或政策信号，对华人的启示，40字",
-    "💡【明日行动】基于今日复盘，明天应该具体做的一件事，40字",
-    "💡【中长期】今日新闻透露的3-12个月内的机会或风险，40字"
-  ]
-}`;
-}
-
-// ── GENERATE ONE EDITION ──────────────────────────────────
-async function generateEdition(editionName) {
-  console.log(`\n📰 Generating ${editionName} edition...`);
-  const prompt = editionName === 'morning' ? morningPrompt() : eveningPrompt();
-
-  const response = await callAPI({
-    model: 'claude-sonnet-4-6', // Use Sonnet for better quality
+  const response = await httpPost({
+    model: 'claude-haiku-4-5-20251001',
     max_tokens: 3000,
     tools: [{ type: 'web_search_20250305', name: 'web_search' }],
-    messages: [{ role: 'user', content: prompt }]
-  });
+    messages: [{ role: 'user', content: buildPrompt(edition) }]
+  }, 180000);
 
   console.log(`  stop_reason: ${response.stop_reason}`);
-  console.log(`  content blocks: ${(response.content||[]).map(b=>b.type).join(', ')}`);
+  console.log(`  content types: [${(response.content||[]).map(b=>b.type).join(', ')}]`);
 
   const data = extractJSON(response);
   data.ready = true;
+  data._edition = edition;
   data.generated_at = new Date().toISOString();
-  data._edition = editionName;
 
-  const outPath = path.join(__dirname, 'data', `${editionName}.json`);
+  const outPath = path.join(__dirname, 'data', `${edition}.json`);
   fs.writeFileSync(outPath, JSON.stringify(data, null, 2), 'utf8');
-  console.log(`  ✅ Saved to data/${editionName}.json (${JSON.stringify(data).length} chars)`);
-  console.log(`  📍 ${data.news?.length || 0} news items`);
-  data.news?.forEach((n, i) => console.log(`    ${i+1}. [${n.category}] ${n.title}`));
+
+  const newsCount = data.news?.length || 0;
+  console.log(`  ✅ Saved ${edition}.json — ${newsCount} news items`);
+  (data.news || []).forEach((n, i) => {
+    console.log(`    ${i+1}. [${n.category}] ${n.title}`);
+  });
   return data;
 }
 
-// ── MAIN ─────────────────────────────────────────────────
+// ── Main ──────────────────────────────────────────────────
 (async () => {
-  console.log(`\n🏙️ 迪拜今日报 Auto-Generator`);
-  console.log(`📅 Date: ${dsEn} (${ds})`);
-  console.log(`🔑 API key: ${API_KEY.slice(0,20)}...`);
-
+  let anyFailed = false;
   for (const ed of editions) {
     try {
       await generateEdition(ed);
-    } catch (e) {
-      console.error(`❌ Failed to generate ${ed}:`, e.message);
-      // Write error state so page knows generation failed
-      const errData = {
-        ready: false,
-        error: e.message,
-        generated_at: new Date().toISOString(),
-        date: ds,
-        edition: ed,
-        news: [], zhishi: [], ruiping: '', money_tips: []
-      };
+    } catch(e) {
+      console.error(`\n❌ Failed ${ed}: ${e.message}`);
+      // Write error placeholder so site can show message
       fs.writeFileSync(
         path.join(__dirname, 'data', `${ed}.json`),
-        JSON.stringify(errData, null, 2)
+        JSON.stringify({
+          ready: false,
+          error: e.message,
+          date: ds, date_en: dsEn, edition: ed,
+          generated_at: new Date().toISOString(),
+          news: [], zhishi: [], ruiping: '', money_tips: []
+        }, null, 2)
       );
-      process.exit(1);
+      anyFailed = true;
     }
   }
-  console.log('\n✅ All done!');
+  if (anyFailed) process.exit(1);
+  console.log('\n✅ Done!');
 })();
