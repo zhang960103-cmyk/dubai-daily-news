@@ -3,366 +3,486 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>迪拜今日报</title>
+<title>迪拜今日报 · Dubai Daily Digest (V4.2 稳定版)</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&display=swap');
-*{margin:0;padding:0;box-sizing:border-box}
-:root{--gold:#c9a84c;--gl:#f0d080;--gd:#7a5a20;--bg:#08080d;--b1:#2a2010;--b2:#1e1a0a;--tx:#d8c8a8;--td:#8a7a58;--tm:#4a3e28}
-body{background:var(--bg);color:var(--tx);font-family:'Noto Serif SC',serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:20px 16px 80px}
-.hd{width:100%;max-width:500px;text-align:center;margin-bottom:18px}
-.rule{height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:8px 0}
-.rule2{height:1px;background:linear-gradient(90deg,transparent,var(--b1),transparent);margin:8px 0}
-.logo{font-size:28px;font-weight:700;background:linear-gradient(135deg,#c9a84c,#f0d080,#a07030);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:4px}
-.logo-sub{font-size:8px;letter-spacing:6px;color:var(--tm);margin-top:4px}
-.tabs{display:flex;margin-top:14px;border:1px solid var(--b1);overflow:hidden;border-radius:2px}
-.tab{flex:1;padding:11px 0;border:none;background:transparent;color:var(--tm);font-family:'Noto Serif SC',serif;font-size:12px;letter-spacing:1px;cursor:pointer;transition:all .25s;display:flex;align-items:center;justify-content:center;gap:5px}
-.tab-div{width:1px;background:var(--b1);flex-shrink:0}
-.tab.am{background:linear-gradient(135deg,#0d2a1a,#0a1e10);color:#6aca8a;border-bottom:2px solid #3a8a5a}
-.tab.pm{background:linear-gradient(135deg,#1a1a3a,#0f0f28);color:#9a8add;border-bottom:2px solid #5a4aaa}
-.tab-hint{font-size:8px;color:var(--tm);margin-top:5px;letter-spacing:.5px}
-.acts{display:flex;gap:7px;flex-wrap:wrap;justify-content:center;margin-top:12px}
-.btn-main{background:linear-gradient(135deg,#c9a84c,#a07830);border:none;color:#08080d;padding:11px 26px;font-family:'Noto Serif SC',serif;font-size:13px;font-weight:700;letter-spacing:2px;cursor:pointer;border-radius:1px;display:inline-flex;align-items:center;gap:6px}
-.btn-main:disabled{opacity:.3;cursor:not-allowed}
-.btn-sm{background:transparent;border:1px solid var(--b1);color:var(--td);padding:10px 14px;font-family:'Noto Serif SC',serif;font-size:11px;letter-spacing:1px;cursor:pointer;border-radius:1px;display:none;align-items:center;gap:5px}
-.btn-sm.vis{display:inline-flex}
-.btn-sm:hover{border-color:var(--gold);color:var(--gold)}
-.btn-tg{border-color:#2a6aaa;color:#7ab0dd}.btn-tg:hover{border-color:#5a9add;color:#aad0ff}
-.btn-wx{border-color:#2a4a1a;color:#7aaa5a}.btn-wx:hover{border-color:#4a7a2a;color:#aacc7a}
-.st{margin-top:10px;min-height:14px;text-align:center}
-.st-prog{font-size:11px;color:var(--gold);letter-spacing:1px;animation:pulse 1.4s infinite}
-.st-err{font-size:10px;color:#cc4444;line-height:1.6;word-break:break-all}
-.st-ok{font-size:10px;color:#4a9a6a;letter-spacing:1px}
-.auto-note{margin-top:5px;font-size:8px;color:var(--tm);letter-spacing:.3px;line-height:1.7}
-.auto-note a{color:var(--gold);text-decoration:none}
-.ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:200;align-items:flex-end;justify-content:center}
-.ov.on{display:flex}
-.drawer{background:#0d0d08;border:1px solid var(--b1);border-bottom:none;width:100%;max-width:500px;padding:22px 20px 30px;border-radius:4px 4px 0 0;animation:slideUp .3s ease}
-.dw-t{font-size:13px;font-weight:700;color:var(--gold);letter-spacing:2px;margin-bottom:3px;display:flex;justify-content:space-between;align-items:center}
-.dw-h{font-size:9px;color:var(--tm);margin-bottom:16px;line-height:1.8}
-.dw-field label{font-size:9px;color:var(--td);display:block;margin:12px 0 4px;letter-spacing:1px}
-.dw-field input{width:100%;background:#08080d;border:1px solid var(--b1);color:var(--tx);padding:9px 10px;font-size:11px;font-family:'Noto Serif SC',serif;outline:none;border-radius:1px}
-.dw-field input:focus{border-color:var(--gold)}
-.dw-fh{font-size:8px;color:var(--tm);margin-top:4px;line-height:1.6}
-.dw-btns{display:flex;gap:8px;margin-top:18px}
-.btn-dws{flex:1;background:linear-gradient(135deg,#c9a84c,#a07830);border:none;color:#08080d;padding:10px;font-weight:700;font-size:12px;cursor:pointer;font-family:'Noto Serif SC',serif;letter-spacing:2px;border-radius:1px}
-.btn-dwc{background:transparent;border:1px solid var(--b1);color:var(--tm);padding:10px 16px;cursor:pointer;font-size:11px;font-family:'Noto Serif SC',serif;border-radius:1px}
-.x-btn{background:none;border:none;color:var(--tm);font-size:18px;cursor:pointer}
-.card{width:100%;max-width:500px;background:linear-gradient(160deg,#141108 0%,#0d0d08 55%,#111008 100%);border:1px solid var(--b1);box-shadow:0 0 60px rgba(201,168,76,.07),0 16px 60px rgba(0,0,0,.95);margin-top:14px;animation:fadeIn .5s ease}
-.t-am{height:3px;background:linear-gradient(90deg,transparent 5%,#2a6a4a 30%,#5aaa7a 50%,#2a6a4a 70%,transparent 95%)}
-.t-pm{height:3px;background:linear-gradient(90deg,transparent 5%,var(--gold) 30%,var(--gl) 50%,var(--gold) 70%,transparent 95%)}
-.bbar{height:2px;background:linear-gradient(90deg,transparent 10%,var(--gd) 40%,var(--gold) 50%,var(--gd) 60%,transparent 90%)}
-.c-hd{padding:14px 20px 10px;display:flex;justify-content:space-between;align-items:flex-end;border-bottom:1px solid var(--b2)}
-.c-name{font-size:16px;font-weight:700;color:var(--gold);letter-spacing:3px}
-.c-ed{font-size:8px;letter-spacing:3px;margin-top:3px}
-.c-ed.am{color:#5aaa7a}.c-ed.pm{color:#9a8add}
-.c-dt{font-size:16px;font-weight:700;color:var(--gold);text-align:right}
-.c-yr{font-size:8px;letter-spacing:2px;color:var(--tm);margin-top:3px;text-align:right}
-.src-bar{padding:5px 20px;background:rgba(255,255,255,.015);border-bottom:1px solid var(--b2);font-size:8px;color:var(--tm);display:flex;align-items:center;gap:5px}
-.live{width:5px;height:5px;border-radius:50%;background:#4a8a5a;flex-shrink:0;animation:blink 2s infinite}
-.sec{padding:10px 20px 6px}
-.sec-lbl{display:flex;align-items:center;gap:7px;margin-bottom:8px}
-.sec-cn{font-size:11px;font-weight:700;color:var(--gold);letter-spacing:2px}
-.sec-en{font-size:7px;letter-spacing:4px;color:var(--tm)}
-.sec-ln{flex:1;height:1px;background:var(--b2)}
-.ni{display:flex;gap:8px;margin-bottom:8px;padding:7px 9px;background:rgba(255,255,255,.014);border-left:2px solid var(--b1)}
-.ni-em{font-size:14px;line-height:1.5;flex-shrink:0}
-.ni-bd{flex:1;min-width:0}
-.ni-mt{display:flex;align-items:center;gap:4px;margin-bottom:2px;flex-wrap:wrap}
-.tag{font-size:7px;padding:1px 4px;border-radius:1px;border:1px solid;letter-spacing:1px;font-weight:700;white-space:nowrap}
-.bdg{font-size:7px;padding:1px 4px;border-radius:1px;font-weight:700;letter-spacing:.5px}
-.bh{background:#3a0a0a;color:#e05050;border:1px solid #6a1010}
-.bw{background:#2a1500;color:#c08020;border:1px solid #4a3010}
-.bg{background:#0a2a10;color:#50c060;border:1px solid #1a5a20}
-.tw{color:#e05858;border-color:#5a1010;background:rgba(224,88,88,.09)}
-.tr{color:#c08030;border-color:#4a3010;background:rgba(192,128,48,.08)}
-.te{color:#c07a4a;border-color:#3a2010;background:rgba(192,122,74,.08)}
-.tb{color:#c0a040;border-color:#3a3010;background:rgba(192,160,64,.08)}
-.tu{color:#4aaa7a;border-color:#103a20;background:rgba(74,170,122,.08)}
-.tl{color:#9a6ac0;border-color:#2a1a3a;background:rgba(154,106,192,.08)}
-.tg2{color:#50c060;border-color:#1a5a20;background:rgba(80,192,96,.08)}
-.ni-ti{font-size:11.5px;font-weight:700;color:#d4c4a0;line-height:1.3}
-.ni-sm{font-size:10.5px;color:var(--td);line-height:1.6;margin-top:3px}
-.ni-sr{font-size:8px;color:var(--tm);margin-top:3px}
-.div{display:flex;align-items:center;padding:1px 20px;margin:3px 0}
-.dl{flex:1;height:1px;background:var(--b2)}
-.dd{color:var(--tm);font-size:8px;margin:0 8px;letter-spacing:3px}
-.zi{display:flex;gap:8px;margin-bottom:7px;font-size:10.5px;color:#9a8a68;line-height:1.7}
-.zn{color:var(--gold);font-size:10px;flex-shrink:0;font-weight:700;margin-top:1px}
-.rp{margin:0 20px 10px;padding:10px 13px;background:rgba(201,168,76,.04);border:1px solid var(--b1);position:relative}
-.rp-l{position:absolute;top:-8px;left:10px;background:#0d0d08;padding:0 7px;font-size:9px;font-weight:700;color:var(--gold);letter-spacing:2px}
-.rp-s{position:absolute;top:-8px;left:65px;background:#0d0d08;padding:0 5px;font-size:7px;letter-spacing:3px;color:var(--tm)}
-.rp-t{font-size:11px;line-height:1.9;color:#c4b490;font-style:italic;padding-top:2px}
-.mi{margin-bottom:6px;padding:6px 10px;background:linear-gradient(90deg,rgba(201,168,76,.07),transparent 80%);border-left:2px solid var(--gd);font-size:10.5px;color:#b09a6a;line-height:1.65}
-.c-ft{border-top:1px solid var(--b2);padding:7px 20px;display:flex;justify-content:space-between}
-.ft{font-size:7px;letter-spacing:2px;color:var(--tm)}
-.empty{width:100%;max-width:500px;text-align:center;padding:44px 20px;border:1px dashed var(--b1);margin-top:14px;color:var(--tm)}
-.ei{font-size:36px;margin-bottom:12px}
-.et{font-size:13px;letter-spacing:2px;margin-bottom:8px;color:var(--td)}
-.es{font-size:9px;line-height:1.9;opacity:.7}
-.loading-wrap{text-align:center;padding:40px;margin-top:14px;color:var(--tm)}
-.loading-spin{font-size:30px;display:inline-block;animation:spin 2s linear infinite}
-.loading-txt{font-size:11px;color:var(--gold);margin-top:12px;letter-spacing:2px;animation:pulse 1.4s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
-@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
-@keyframes spin{to{transform:rotate(360deg)}}
-.sp{display:inline-block;width:10px;height:10px;border:2px solid rgba(201,168,76,.2);border-top-color:var(--gold);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:4px}
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&display=swap');
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{--gold:#c9a84c;--gl:#f0d080;--gd:#7a5a20;--bg:#08080d;--b1:#2a2010;--b2:#1e1a0a;--tx:#d8c8a8;--td:#8a7a58;--tm:#4a3e28}
+  body{background:var(--bg);color:var(--tx);font-family:'Noto Serif SC',serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:24px 16px 60px}
+
+  .mast{width:100%;max-width:500px;text-align:center;margin-bottom:20px}
+  .rule{height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:9px 0}
+  .rule2{height:1px;background:linear-gradient(90deg,transparent,var(--b1),transparent);margin:9px 0}
+  .msub{font-size:9px;letter-spacing:8px;color:var(--tm);margin-bottom:4px}
+  .mcn{font-size:30px;font-weight:700;background:linear-gradient(135deg,#c9a84c,#f0d080,#a07030);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:5px;line-height:1;margin-bottom:5px}
+  .men{font-size:8px;letter-spacing:6px;color:var(--tm)}
+  .mode-badge{display:inline-block;padding:4px 12px;background:linear-gradient(135deg,#4a8a5a,#2a6a3a);border-radius:12px;font-size:9px;font-weight:700;letter-spacing:1px;margin-bottom:10px}
+
+  .btn-row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:14px}
+  .gbtn{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#c9a84c,#a07830);border:none;color:#08080d;padding:11px 24px;font-family:'Noto Serif SC',serif;font-size:13px;font-weight:700;letter-spacing:2px;cursor:pointer;transition:opacity .2s;border-radius:1px}
+  .gbtn:disabled{opacity:.35;cursor:not-allowed}
+  .sbtn{display:none;align-items:center;gap:6px;background:#1a1a0a;border:1px solid var(--gold);color:var(--gold);padding:11px 18px;font-family:'Noto Serif SC',serif;font-size:12px;font-weight:700;letter-spacing:2px;cursor:pointer;border-radius:1px;transition:all .2s}
+  .sbtn:hover{background:rgba(201,168,76,.15)}
+  .tbtn{display:none;align-items:center;gap:6px;background:#0a1a2a;border:1px solid #2a6aaa;color:#7aaadd;padding:11px 18px;font-family:'Noto Serif SC',serif;font-size:12px;font-weight:700;letter-spacing:2px;cursor:pointer;border-radius:1px}
+  .tbtn:hover{background:rgba(42,106,170,.2)}
+  .setbtn{display:inline-flex;align-items:center;gap:5px;background:transparent;border:1px solid var(--b1);color:var(--tm);padding:9px 14px;font-size:11px;cursor:pointer;border-radius:1px;letter-spacing:1px}
+  .dbgbtn{display:inline-flex;align-items:center;gap:5px;background:transparent;border:1px solid #4a4a2a;color:#8a8a5a;padding:9px 14px;font-size:11px;cursor:pointer;border-radius:1px;letter-spacing:1px}
+
+  .prog{margin-top:10px;font-size:11px;color:var(--gold);letter-spacing:1px;min-height:15px;animation:pulse 1.5s ease-in-out infinite}
+  .err{margin-top:8px;font-size:10px;color:#cc4444;max-width:460px;line-height:1.6;word-break:break-all}
+
+  .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:100;align-items:center;justify-content:center;padding:20px}
+  .overlay.show{display:flex}
+  .modal{background:#0f0f0a;border:1px solid var(--b1);padding:24px;width:100%;max-width:420px;position:relative;max-height:80vh;overflow-y:auto}
+  .modal-title{font-size:14px;font-weight:700;color:var(--gold);letter-spacing:2px;margin-bottom:16px}
+  .modal label{display:block;font-size:10px;color:var(--td);letter-spacing:1px;margin-bottom:5px;margin-top:12px}
+  .modal input{width:100%;background:#08080d;border:1px solid var(--b1);color:var(--tx);padding:9px 10px;font-size:11px;font-family:'Noto Serif SC',serif;outline:none;border-radius:1px}
+  .modal input:focus{border-color:var(--gold)}
+  .modal-hint{font-size:9px;color:var(--tm);margin-top:5px;line-height:1.6}
+  .modal-btns{display:flex;gap:8px;margin-top:18px}
+  .modal-save{flex:1;background:linear-gradient(135deg,#c9a84c,#a07830);border:none;color:#08080d;padding:10px;font-weight:700;font-size:12px;cursor:pointer;font-family:'Noto Serif SC',serif;letter-spacing:2px}
+  .modal-cancel{background:transparent;border:1px solid var(--b1);color:var(--tm);padding:10px 16px;cursor:pointer;font-size:11px;font-family:'Noto Serif SC',serif}
+  .close-x{position:absolute;top:12px;right:14px;background:none;border:none;color:var(--tm);font-size:18px;cursor:pointer}
+
+  .debug-log{background:#0a0a08;border:1px solid #2a2a1a;padding:12px;font-size:9px;color:#8a8a6a;font-family:monospace;max-height:200px;overflow-y:auto;margin-top:10px;line-height:1.4;display:none}
+  .debug-log.show{display:block}
+
+  /* CARD STYLES */
+  .card-container{width:100%;max-width:500px;margin-top:16px;display:flex;flex-direction:column;gap:20px}
+  .card{width:100%;background:linear-gradient(160deg,#141108 0%,#0d0d08 50%,#111008 100%);border:1px solid var(--b1);box-shadow:0 0 60px rgba(201,168,76,.08),0 20px 60px rgba(0,0,0,.9);animation:fadeIn .5s ease;position:relative;overflow:hidden}
+  .tbar{height:3px;background:linear-gradient(90deg,transparent 5%,var(--gold) 30%,var(--gl) 50%,var(--gold) 70%,transparent 95%)}
+  .bbar{height:2px;background:linear-gradient(90deg,transparent 10%,var(--gd) 40%,var(--gold) 50%,var(--gd) 60%,transparent 90%)}
+  .chdr{padding:14px 20px 10px;display:flex;justify-content:space-between;align-items:flex-end;border-bottom:1px solid var(--b2)}
+  .hl .cn{font-size:17px;font-weight:700;color:var(--gold);letter-spacing:3px}
+  .hl .en{font-size:7px;letter-spacing:4px;color:var(--tm);margin-top:3px}
+  .hr .dt{font-size:17px;font-weight:700;color:var(--gold);text-align:right}
+  .hr .yr{font-size:8px;letter-spacing:2px;color:var(--tm);margin-top:3px;text-align:right}
+  .sbar{padding:5px 20px;background:rgba(201,168,76,.03);border-bottom:1px solid var(--b2);font-size:8px;color:var(--tm);display:flex;align-items:center;gap:5px}
+  .sdot{width:4px;height:4px;border-radius:50%;background:#4a8a5a;flex-shrink:0;animation:blink 2s infinite}
+  
+  .sec{padding:12px 20px 8px}
+  .slbl{display:flex;align-items:center;gap:7px;margin-bottom:10px}
+  .scn{font-size:12px;font-weight:700;color:var(--gold);letter-spacing:2px}
+  .sen{font-size:7px;letter-spacing:4px;color:var(--tm)}
+  .sln{flex:1;height:1px;background:var(--b2)}
+  
+  .ni{display:flex;gap:10px;margin-bottom:10px;padding:8px 10px;background:rgba(255,255,255,.015);border-left:2px solid var(--b1)}
+  .ne{font-size:15px;line-height:1.5;flex-shrink:0}
+  .nb{flex:1;min-width:0}
+  .nt{font-size:13px;font-weight:700;color:#d4c4a0;line-height:1.4;margin-bottom:3px}
+  .ns{font-size:11px;color:var(--td);line-height:1.6}
+  
+  .rw{margin:0 20px 12px;padding:12px 15px;background:rgba(201,168,76,.04);border:1px solid var(--b1);position:relative}
+  .rl{position:absolute;top:-8px;left:10px;background:#0d0d08;padding:0 8px;font-size:9px;font-weight:700;color:var(--gold);letter-spacing:2px}
+  .rt{font-size:12px;line-height:1.8;color:#c4b490;font-style:italic;padding-top:2px}
+  
+  .mi{margin-bottom:8px;padding:8px 12px;background:linear-gradient(90deg,rgba(201,168,76,.07),transparent 80%);border-left:2px solid var(--gd);font-size:11px;color:#b09a6a;line-height:1.7}
+  .mi strong{color:var(--gold);font-size:12px;display:block;margin-bottom:4px}
+  
+  .cft{border-top:1px solid var(--b2);padding:8px 20px;display:flex;justify-content:space-between}
+  .ft{font-size:8px;letter-spacing:2px;color:var(--tm)}
+
+  .share-status{margin-top:10px;font-size:11px;color:#4aaa7a;letter-spacing:1px;min-height:16px;text-align:center}
+  .empty{width:100%;max-width:500px;text-align:center;padding:44px 20px;border:1px dashed var(--b1);margin-top:16px;color:var(--tm)}
+  .ei{font-size:36px;margin-bottom:12px}
+  .et{font-size:12px;letter-spacing:2px}
+
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 </style>
 </head>
 <body>
 
-<div class="ov" id="ov" onclick="if(event.target===this)closeSet()">
-  <div class="drawer">
-    <div class="dw-t"><span>⚙️ Telegram 推送设置</span><button class="x-btn" onclick="closeSet()">✕</button></div>
-    <div class="dw-h">设置后一键发图到Telegram频道/群/个人<br>① @BotFather → /newbot → 复制Token<br>② @userinfobot 获取你的Chat ID</div>
-    <div class="dw-field">
-      <label>Bot Token</label>
-      <input id="tgT" placeholder="1234567890:ABCdef...">
-      <div class="dw-fh">从 @BotFather 获取</div>
-    </div>
-    <div class="dw-field">
-      <label>Chat ID</label>
-      <input id="tgC" placeholder="-1001234567890 或 123456789">
-      <div class="dw-fh">群组有负号 | 频道可用 @频道名</div>
-    </div>
-    <div class="dw-btns">
-      <button class="btn-dws" onclick="saveSet()">💾 保存</button>
-      <button class="btn-dwc" onclick="closeSet()">取消</button>
+<!-- SETTINGS MODAL -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <button class="close-x" onclick="closeSettings()">✕</button>
+    <div class="modal-title">⚙️ Telegram 推送设置</div>
+    <label>Bot Token</label>
+    <input id="tgToken" type="text" placeholder="1234567890:ABCdef...">
+    <div class="modal-hint">从 @BotFather 获取</div>
+    <label>Chat ID</label>
+    <input id="tgChatId" type="text" placeholder="-1001234567890 或用户ID">
+    <div class="modal-hint">从 @userinfobot 或 @getidsbot 获取</div>
+    <div class="modal-btns">
+      <button class="modal-save" onclick="saveSettings()">💾 保存</button>
+      <button class="modal-cancel" onclick="closeSettings()">取消</button>
     </div>
   </div>
 </div>
 
-<div class="hd">
+<!-- MASTHEAD -->
+<div class="mast">
   <div class="rule"></div>
-  <div class="logo">迪拜今日报</div>
-  <div class="logo-sub">DUBAI DAILY · UAE LOCAL LIFE · AUTO-GENERATED DAILY</div>
+  <div class="msub">Dubai · 迪拜 · دبي · UAE</div>
+  <div class="mcn">迪拜今日报</div>
+  <div class="men">LOCAL LIFE · REAL NEWS · DAILY UPDATES · AI CURATED</div>
+  <div class="mode-badge" id="modeBadge">🌅 早间版</div>
   <div class="rule2"></div>
-  <div class="tabs">
-    <button class="tab" id="tabAM" onclick="switchEd('morning')">🌅 早安迪拜</button>
-    <div class="tab-div"></div>
-    <button class="tab" id="tabPM" onclick="switchEd('evening')">🌙 夜读迪拜</button>
+  <div class="btn-row">
+    <button class="gbtn" id="genBtn" onclick="generate()">📰 生成今日报</button>
+    <button class="sbtn" id="saveBtn" onclick="saveAllImages()">🖼️ 保存所有图片</button>
+    <button class="tbtn" id="tgBtn" onclick="sendAllToTelegram()">✈️ 发送Telegram</button>
+    <button class="setbtn" onclick="openSettings()">⚙️ 设置</button>
+    <button class="dbgbtn" onclick="toggleDebug()">🐛 调试</button>
   </div>
-  <div class="tab-hint" id="tabHint"></div>
-  <div class="acts">
-    <button class="btn-main" id="btnGen" onclick="manualGen()">📰 立即更新</button>
-    <button class="btn-sm btn-tg" id="btnTg" onclick="sendTg()">✈️ Telegram</button>
-    <button class="btn-sm btn-wx" id="btnWx" onclick="copyTxt()">📋 复制文本</button>
-    <button class="btn-sm" id="btnSave" onclick="saveImg()">🖼️ 保存图片</button>
-    <button class="btn-sm" onclick="openSet()" style="border-color:#2a2a1a;color:#5a5a3a">⚙️</button>
-  </div>
-  <div class="st" id="st"></div>
-  <div class="auto-note" id="note"></div>
+  <div class="prog" id="prog" style="display:none"></div>
+  <div class="err" id="err" style="display:none"></div>
+  <div class="debug-log" id="debugLog"></div>
+  <div class="share-status" id="shareStatus"></div>
 </div>
 
-<div class="loading-wrap" id="stLoad" style="display:none">
-  <div class="loading-spin">📰</div>
-  <div class="loading-txt">读取今日新闻中...</div>
+<!-- EMPTY STATE -->
+<div class="empty" id="empty">
+  <div class="ei">📰</div>
+  <div class="et">点击「生成今日报」</div>
+  <div class="es" style="font-size:9px;margin-top:10px;line-height:1.6;opacity:0.6">
+    🌅 早间版 (05:00)：高密度资讯、天气出行、今日福利<br>
+    🌙 晚间版 (21:00)：深度锐评、行业拆解、保姆级实操指南<br>
+    系统将自动生成多张高清卡片，确保内容丰富且清晰易读。
+  </div>
 </div>
 
-<div class="empty" id="stEmpty" style="display:none">
-  <div class="ei" id="eIcon">🌅</div>
-  <div class="et" id="eTit">今日新闻尚未生成</div>
-  <div class="es" id="eDesc">本报每日自动生成：早安版 06:00 · 夜读版 21:00（迪拜时间）<br>点「立即更新」可手动生成</div>
-</div>
-
-<div class="card" id="card" style="display:none">
-  <div id="topBar"></div>
-  <div class="c-hd">
-    <div><div class="c-name">迪拜今日报</div><div class="c-ed" id="cEd"></div></div>
-    <div><div class="c-dt" id="cDt"></div><div class="c-yr" id="cYr"></div></div>
-  </div>
-  <div class="src-bar"><div class="live"></div><span id="srcLbl"></span></div>
-  <div class="sec">
-    <div class="sec-lbl"><span class="sec-cn" id="secTit">今日要闻</span><span class="sec-en">UAE TODAY</span><span class="sec-ln"></span></div>
-    <div id="newsC"></div>
-  </div>
-  <div class="div"><div class="dl"></div><div class="dd">···</div><div class="dl"></div></div>
-  <div class="sec">
-    <div class="sec-lbl"><span class="sec-cn">知识提点</span><span class="sec-en">INSIGHTS</span><span class="sec-ln"></span></div>
-    <div id="zhiC"></div>
-  </div>
-  <div class="div"><div class="dl"></div><div class="dd">···</div><div class="dl"></div></div>
-  <div class="rp"><div class="rp-l">今日锐评</div><div class="rp-s">SHARP TAKE</div><div class="rp-t" id="rpT"></div></div>
-  <div class="sec" style="padding-top:0">
-    <div class="sec-lbl"><span class="sec-cn">赚钱机会</span><span class="sec-en">MONEY MOVES</span><span class="sec-ln"></span></div>
-    <div id="monC"></div>
-  </div>
-  <div class="c-ft"><div class="ft">UAE本地智库 · AI实时搜索 · 迪拜华人必读</div><div class="ft" id="cFt"></div></div>
-  <div class="bbar"></div>
-</div>
+<!-- CARDS CONTAINER -->
+<div class="card-container" id="cardContainer"></div>
 
 <script>
-const TM={'战事':'tw','风险预警':'tr','房产':'te','商业':'tb','教育':'tu','本地生活':'tl','汽车':'tl','政策福利':'tg2','好消息':'tg2','时事':'tb'};
-function K(){return atob('c2stYW50LWFwaTAzLU9KWWNPZzhZMl9LN0c4bVE0aEl1Rmk=')+atob('d3hWUkJGQ09sUEhIcnRaY1BveEZxdG9QTDZMTzlMbkQyOEc=')+atob('WmRkVENUT1FIWWxTMkJaMHBFY0U0UXpwcExLVlEtRnpWZVJ3QUE=');}
-let ed='morning',curData=null,lastTxt='';
-function dubaiH(){return(new Date().getUTCHours()+4)%24;}
-function todayISO(){const n=new Date(Date.now()+4*3600000);return n.getUTCFullYear()+'-'+String(n.getUTCMonth()+1).padStart(2,'0')+'-'+String(n.getUTCDate()).padStart(2,'0');}
-function dateCN(){const n=new Date(Date.now()+4*3600000);return(n.getUTCMonth()+1)+'月'+n.getUTCDate()+'日';}
-function openSet(){document.getElementById('tgT').value=localStorage.getItem('tg_t')||'';document.getElementById('tgC').value=localStorage.getItem('tg_c')||'';document.getElementById('ov').classList.add('on');}
-function closeSet(){document.getElementById('ov').classList.remove('on');}
-function saveSet(){localStorage.setItem('tg_t',document.getElementById('tgT').value.trim());localStorage.setItem('tg_c',document.getElementById('tgC').value.trim());closeSet();setSt('ok','✅ 设置已保存');}
-function setSt(t,m){document.getElementById('st').innerHTML=m?`<div class="st-${t==='prog'?'prog':t==='err'?'err':'ok'}">${m}</div>`:''}
-function setNote(m){document.getElementById('note').innerHTML=m;}
-function show(s){['stLoad','stEmpty','card'].forEach(id=>document.getElementById(id).style.display='none');if(s)document.getElementById(s).style.display='block';}
-function showBtns(){['btnTg','btnWx','btnSave'].forEach(id=>document.getElementById(id).classList.add('vis'));}
-
-function switchEd(e){
-  ed=e;const isM=e==='morning';
-  document.getElementById('tabAM').className='tab'+(isM?' am':'');
-  document.getElementById('tabPM').className='tab'+(!isM?' pm':'');
-  const h=dubaiH();
-  document.getElementById('tabHint').textContent=isM?`🌅 早安版 · 每天06:00自动生成 · 迪拜现在${h}:00`:`🌙 夜读版 · 每天21:00自动生成 · 迪拜现在${h}:00`;
-  document.getElementById('eIcon').textContent=isM?'🌅':'🌙';
-  document.getElementById('eTit').textContent=isM?'早安版尚未生成':'夜读版尚未生成';
-  loadNews();
+const DEBUG = true;
+function log(msg) {
+  if (!DEBUG) return;
+  const el = document.getElementById('debugLog');
+  const ts = new Date().toLocaleTimeString();
+  el.textContent += `[${ts}] ${msg}\n`;
+  el.scrollTop = el.scrollHeight;
 }
 
-async function loadNews(){
-  show('stLoad');setSt('','');setNote('');
-  try{
-    const r=await fetch('data/'+ed+'.json?t='+Date.now());
-    if(!r.ok)throw new Error('file missing');
-    const d=await r.json();
-    if(!d.ready){show('stEmpty');setNote('GitHub Actions 将于 '+(ed==='morning'?'06:00':'21:00')+' 自动生成 · 或点<a href="#" onclick="manualGen();return false">立即更新</a>');return;}
-    const today=todayISO();
-    const genT=d.generated_at?new Date(d.generated_at).toLocaleTimeString('zh',{hour:'2-digit',minute:'2-digit'}):'';
-    const isToday=d.date_en===today;
-    d._edition=ed;curData=d;buildTxt(d);renderCard(d);show('card');showBtns();
-    setNote(isToday?`✅ 今日新闻 · ${genT}生成 · <a href="#" onclick="manualGen();return false">刷新</a>`:`⚠️ 显示${d.date_en}数据 · 今日将于${ed==='morning'?'06:00':'21:00'}自动更新 · <a href="#" onclick="manualGen();return false">立即生成</a>`);
-  }catch{
-    show('stEmpty');
-    setNote('首次使用 · 点「立即更新」生成 · 之后每天自动更新');
+function toggleDebug() {
+  const el = document.getElementById('debugLog');
+  el.classList.toggle('show');
+}
+
+function K(){
+  return atob('c2stYW50LWFwaTAzLU9KWWNPZzhZMl9LN0c4bVE0aEl1Rmk=')
+       + atob('d3hWUkJGQ09sUEhIcnRaY1BveEZxdG9QTDZMTzlMbkQyOEc=')
+       + atob('WmRkVENUT1FIWWxTMkJaMHBFY0U0UXpwcExLVlEtRnpWZVJ3QUE=');
+}
+
+const FEEDS = [
+  {n:'MOI News',         u:'https://moi.gov.ae/en/rss/news.aspx', priority:10},
+  {n:'MOE Instagram',    u:'https://rsshub.app/instagram/user/economy.ae', priority:9},
+  {n:'RTA Instagram',    u:'https://rsshub.app/instagram/user/rta_dubai', priority:8},
+  {n:'Dubai Police',     u:'https://rsshub.app/instagram/user/dubaipolicehq', priority:8},
+  {n:'WAM News',         u:'https://www.wam.ae/en/rss', priority:7},
+  {n:'Gulf News UAE',    u:'https://gulfnews.com/uae/rss', priority:6},
+];
+
+function getCurrentMode(){
+  const hour = new Date().getHours();
+  if(hour >= 5 && hour < 12) return 'morning';
+  if(hour >= 21 || hour < 5) return 'evening';
+  return 'morning';
+}
+
+function openSettings(){
+  document.getElementById('tgToken').value = localStorage.getItem('tg_token')||'';
+  document.getElementById('tgChatId').value = localStorage.getItem('tg_chatid')||'';
+  document.getElementById('overlay').classList.add('show');
+}
+function closeSettings(){ document.getElementById('overlay').classList.remove('show'); }
+function saveSettings(){
+  localStorage.setItem('tg_token', document.getElementById('tgToken').value.trim());
+  localStorage.setItem('tg_chatid', document.getElementById('tgChatId').value.trim());
+  closeSettings();
+  setShareStatus('✅ Telegram设置已保存');
+}
+
+// 【核心修复】堆栈式 JSON 提取引擎
+function extractJSON(str) {
+  log('🔍 开始使用堆栈式算法提取 JSON...');
+  log('原始长度: ' + str.length);
+  
+  try {
+    // 移除 markdown 代码块标记
+    str = str.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
+    log('移除代码块后长度: ' + str.length);
+    
+    // 堆栈式括号匹配：找到第一个 { 和对应的最后一个 }
+    let braceCount = 0;
+    let startIdx = -1;
+    let endIdx = -1;
+    
+    for (let i = 0; i < str.length; i++) {
+      const char = str[i];
+      
+      if (char === '{') {
+        if (startIdx === -1) startIdx = i;
+        braceCount++;
+      } else if (char === '}') {
+        braceCount--;
+        if (braceCount === 0 && startIdx !== -1) {
+          endIdx = i;
+          break;
+        }
+      }
+    }
+    
+    if (startIdx === -1 || endIdx === -1) {
+      throw new Error('找不到完整的 JSON 对象边界');
+    }
+    
+    const jsonStr = str.substring(startIdx, endIdx + 1);
+    log('✅ 提取 JSON 子串: ' + jsonStr.length + ' 字符');
+    log('JSON 开头: ' + jsonStr.substring(0, 100));
+    
+    const result = JSON.parse(jsonStr);
+    log('✅ JSON 解析成功');
+    return result;
+    
+  } catch(e) {
+    log('❌ JSON 提取失败: ' + e.message);
+    throw e;
   }
 }
 
-async function manualGen(){
-  const btn=document.getElementById('btnGen');
-  btn.disabled=true;btn.innerHTML='<span class="sp"></span>搜索中...';
-  setSt('prog',ed==='morning'?'🌅 AI搜索今日阿联酋早报...':'🌙 AI搜索今日阿联酋动态...');
-  show(null);document.getElementById('card').style.display='none';
-  const ds=dateCN(),dsEn=todayISO();
+async function fetchOne(feed){
+  const api='https://api.rss2json.com/v1/api.json?rss_url='+encodeURIComponent(feed.u);
   try{
-    const prompt=ed==='morning'?mPrompt(ds,dsEn):ePrompt(ds,dsEn);
-    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':K(),'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:3000,tools:[{type:'web_search_20250305',name:'web_search'}],messages:[{role:'user',content:prompt}]})});
-    if(!res.ok){const t=await res.text();throw new Error('HTTP '+res.status+': '+t.slice(0,160));}
-    setSt('prog','🤖 AI提炼中...');
-    const api=await res.json();
-    if(!api?.content?.length)throw new Error('API返回为空');
-    let txt=api.content.filter(b=>b.type==='text').map(b=>b.text).join('').replace(/^```[a-z]*\n?/im,'').replace(/\n?```$/m,'').trim();
-    const m=txt.match(/\{[\s\S]*\}/);
-    if(!m)throw new Error('JSON解析失败: '+txt.slice(0,100));
-    const d=JSON.parse(m[0]);d._edition=ed;d.generated_at=new Date().toISOString();
-    curData=d;buildTxt(d);renderCard(d);show('card');showBtns();
-    setSt('ok','✅ 最新新闻已生成');setTimeout(()=>setSt('',''),3000);
-    setNote(`✅ 手动生成 · ${new Date().toLocaleTimeString('zh',{hour:'2-digit',minute:'2-digit'})} · 自动版每天定时更新`);
-  }catch(e){setSt('err','⚠️ '+e.message);show('stEmpty');}
-  finally{btn.disabled=false;btn.innerHTML='📰 立即更新';}
+    log(`📡 抓取 ${feed.n}...`);
+    const r = await fetch(api);
+    const j = await r.json();
+    if(j.status!=='ok') {
+      log(`⚠️ ${feed.n} 返回错误: ${j.status}`);
+      return [];
+    }
+    const items = j.items.slice(0,10).map(x=>({
+      src:feed.n,
+      title:x.title,
+      desc:x.description.replace(/<[^>]*>/g,'').slice(0,150),
+      pubDate: x.pubDate
+    }));
+    log(`✅ ${feed.n} 成功获取 ${items.length} 条`);
+    return items;
+  }catch(e){
+    log(`❌ ${feed.n} 抓取失败: ${e.message}`);
+    return [];
+  }
 }
 
-function mPrompt(ds,dsEn){
-  return `请搜索今日阿联酋迪拜最新新闻（${dsEn}），为迪拜华人生成早安简报。
-
-搜索词：
-1. UAE Dubai news ${dsEn}
-2. UAE government ministry announcement ${dsEn}
-3. Middle East war conflict ${dsEn} casualties
-4. Dubai police RTA DEWA MOE announcement ${dsEn}
-
-【必须遵守的选稿标准】
-✅ 战事：必须有具体交战方+地点+今日进展+伤亡数字，不能笼统
-✅ 政策福利：政府机构公告、免费服务、优惠政策（MOE摆摊/RTA新规/签证/DEWA）
-✅ 本地生活：天气预警/交通管制/本地活动/施工影响
-✅ 风险预警：诈骗/法律变化/安全警告
-❌ 禁止：没有数字的笼统标题（如"迪拜经济持续增长"）
-❌ 禁止：只选正面新闻，负面同样重要
-
-只返回JSON（禁止任何markdown）：
-{"date":"${ds}","date_en":"${dsEn}","edition":"morning","ready":true,"news":[{"emoji":"⚔️","category":"战事","title":"【交战方】今日对【地点】【行动】，X人【伤/亡】","summary":"战况对迪拜能源/海运/汇率实际影响，35字","source":"媒体","hot":true},{"emoji":"🎁","category":"政策福利","title":"【机构名】宣布【政策/活动】含时间金额","summary":"谁受益+怎么申请，35字","source":"媒体","hot":true},{"emoji":"🚦","category":"本地生活","title":"今日【具体路段/区域/活动】提示","summary":"具体影响及应对，35字","source":"媒体","hot":false},{"emoji":"⚠️","category":"风险预警","title":"【机构】警告：【具体诈骗/风险事件】","summary":"如何防范，35字","source":"媒体","hot":false},{"emoji":"🏙️","category":"房产","title":"【区域】【数据类型】达【具体数字】","summary":"35字","source":"媒体","hot":false},{"emoji":"💼","category":"商业","title":"【公司/行业】【具体事件】含数字","summary":"35字","source":"媒体","hot":false}],"zhishi":["【政策操作】今日最值得华人行动的政策/福利完整操作指引，含时间地点申请方式，60字","【战事影响】此次冲突具体影响迪拜：油价/海运/汇率的量化数据，60字","【早间行动】今天出门前最应做的一件具体事及步骤，60字"],"ruiping":"早安锐评：今日最值得关注的矛盾或机遇，直接点，不废话，华人视角，70字","money_tips":["💡【今日行动】今天就能做的具体事含操作步骤，40字","💡【规避坑】今日需警惕的具体风险或法律边界，40字","💡【布局信号】今日信息透露的3-6个月机会，40字"]}`;
+function SP(msg){ const e=document.getElementById('prog'); e.style.display=msg?'block':'none'; e.textContent=msg||''; }
+function setShareStatus(msg, isErr=false){ 
+  const e = document.getElementById('shareStatus');
+  e.textContent=msg;
+  e.style.color = isErr ? '#cc4444' : '#4aaa7a';
 }
 
-function ePrompt(ds,dsEn){
-  return `请搜索今日阿联酋迪拜全天动态（${dsEn}），为迪拜华人生成夜读深度简报。
+let generatedData = null;
 
-搜索词：
-1. Dubai UAE news today ${dsEn}
-2. Middle East war conflict ${dsEn} full update
-3. Dubai economy property business data ${dsEn}
-4. UAE law regulation announcement ${dsEn}
+async function generate(){
+  const btn=document.getElementById('genBtn');
+  const container=document.getElementById('cardContainer');
+  const empty=document.getElementById('empty');
+  btn.disabled=true;
+  container.innerHTML='';
+  empty.style.display='none';
+  setShareStatus('');
+  document.getElementById('debugLog').textContent = '';
 
-【选稿标准】
-✅ 战事全天汇总（最新伤亡+领土变化+外交动态，具体数字）
-✅ 今日经济/市场数据（油价/DLD成交量/汇率，含具体数字）
-✅ 有深度值得细读的政策/社会新闻
-✅ 负面批评性新闻同等重要
-❌ 禁止模糊表述，每条必须有数字或具体细节
-
-只返回JSON（禁止任何markdown）：
-{"date":"${ds}","date_en":"${dsEn}","edition":"evening","ready":true,"news":[{"emoji":"⚔️","category":"战事","title":"今日战场：【交战方】+【进展】+伤亡X人/平民Y人","summary":"全天最重要战事，地区影响，35字","source":"媒体","hot":true},{"emoji":"📊","category":"商业","title":"今日【指标】：X（含同比数字）","summary":"含义及对居民实际影响，35字","source":"媒体","hot":false},{"emoji":"🏙️","category":"房产","title":"【区域】今日成交X套，均价AED X万","summary":"35字","source":"媒体","hot":false},{"emoji":"🎓","category":"教育","title":"【机构】今日宣布【具体政策/事件】","summary":"35字","source":"媒体","hot":false},{"emoji":"🌆","category":"本地生活","title":"今日影响居民的具体民生事件","summary":"35字","source":"媒体","hot":false},{"emoji":"⚠️","category":"风险预警","title":"今日曝出【具体风险/负面事件】","summary":"35字","source":"媒体","hot":false}],"zhishi":["【今日复盘】今天最重要事件的根源及下一步走向，深度60字","【明日预判】基于今日信息，明天值得重点关注的具体事项，60字","【数据解读】今日最重要数字的真实含义及对华人实际影响，60字"],"ruiping":"夜读锐评：今日最值得深思的一件事，有立场有温度，迪拜华人视角，睡前反思，80字","money_tips":["💡【今日信号】今天最重要的经济或政策信号华人如何利用，40字","💡【明日行动】基于今日复盘，明天应做的具体事，40字","💡【长线机会】今日信息透露的6-12个月投资机会，40字"]}`;
-}
-
-function renderCard(d){
-  const isM=d._edition==='morning';
-  document.getElementById('topBar').className=isM?'t-am':'t-pm';
-  document.getElementById('cDt').textContent=d.date||'';
-  document.getElementById('cYr').textContent='2026 · DUBAI UAE';
-  const eEl=document.getElementById('cEd');eEl.className='c-ed '+(isM?'am':'pm');eEl.textContent=isM?'🌅 早安迪拜 MORNING':'🌙 夜读迪拜 EVENING';
-  document.getElementById('cFt').textContent=(d.date||'')+' · YOYO出品';
-  document.getElementById('secTit').textContent=isM?'今日早报':'今日复盘';
-  const gt=d.generated_at?new Date(d.generated_at).toLocaleString('zh',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}):'AI';
-  document.getElementById('srcLbl').textContent='AI实时搜索 · 阿联酋+国际媒体 · '+gt;
-  document.getElementById('newsC').innerHTML=(d.news||[]).map(item=>{
-    const tc=TM[item.category]||'tb',iW=item.category==='战事',iR=item.category==='风险预警',iG=item.category==='政策福利'||item.category==='好消息';
-    return `<div class="ni"><div class="ni-em">${item.emoji||'📌'}</div><div class="ni-bd"><div class="ni-mt"><span class="tag ${tc}">${item.category}</span>${iW?'<span class="bdg bh">🔥热点</span>':''}${iR?'<span class="bdg bw">⚠️预警</span>':''}${iG?'<span class="bdg bg">🎁福利</span>':''}<span class="ni-ti">${item.title}</span></div><div class="ni-sm">${item.summary}</div>${item.source?`<div class="ni-sr">📰 ${item.source}</div>`:''}</div></div>`;
-  }).join('');
-  document.getElementById('zhiC').innerHTML=(d.zhishi||[]).map((t,i)=>`<div class="zi"><span class="zn">0${i+1}</span><span>${t}</span></div>`).join('');
-  document.getElementById('rpT').innerHTML=`\u201c${d.ruiping}\u201d`;
-  document.getElementById('monC').innerHTML=(d.money_tips||[]).map(t=>`<div class="mi">${t}</div>`).join('');
-}
-
-function buildTxt(d){
-  const isM=d._edition==='morning';
-  const L=[`${isM?'🌅 早安迪拜':'🌙 夜读迪拜'} · ${d.date}`,'━━━━━━━━━━━━━━'];
-  (d.news||[]).forEach(n=>{L.push(`${n.emoji} 【${n.category}】${n.title}`);L.push(`  ${n.summary}`);});
-  L.push('━━━━━━━━━━━━━━','📖 知识提点');
-  (d.zhishi||[]).forEach((z,i)=>L.push(`${i+1}. ${z}`));
-  L.push('',`💬 ${d.ruiping}`,'','💰 赚钱机会');
-  (d.money_tips||[]).forEach(m=>L.push(m));
-  L.push('━━━━━━━━━━━━━━','迪拜今日报 · YOYO出品 · AI每日自动生成');
-  lastTxt=L.join('\n');
-}
-
-async function saveImg(){
-  const btn=document.getElementById('btnSave');btn.innerHTML='<span class="sp"></span>生成中...';btn.disabled=true;
-  try{const c=await html2canvas(document.getElementById('card'),{backgroundColor:'#08080d',scale:2,useCORS:true,logging:false});const a=document.createElement('a');a.download=`迪拜今日报_${ed==='morning'?'早安':'夜读'}_${curData?.date||''}.png`;a.href=c.toDataURL('image/png');a.click();setSt('ok','✅ 图片已保存');setTimeout(()=>setSt('',''),3000);}
-  catch(e){setSt('err','❌ '+e.message);}
-  finally{btn.disabled=false;btn.innerHTML='🖼️ 保存图片';}
-}
-
-async function copyTxt(){
-  if(!lastTxt){setSt('err','请先生成今日报');return;}
-  try{await navigator.clipboard.writeText(lastTxt);}catch{const ta=document.createElement('textarea');ta.value=lastTxt;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);}
-  setSt('ok','✅ 文字已复制，粘贴到微信即可');setTimeout(()=>setSt('',''),3000);
-}
-
-async function sendTg(){
-  const tok=localStorage.getItem('tg_t')||'',cid=localStorage.getItem('tg_c')||'';
-  if(!tok||!cid){openSet();return;}
-  const btn=document.getElementById('btnTg');btn.innerHTML='<span class="sp"></span>发送中...';btn.disabled=true;
   try{
-    const c=await html2canvas(document.getElementById('card'),{backgroundColor:'#08080d',scale:2,useCORS:true,logging:false});
-    const blob=await new Promise(r=>c.toBlob(r,'image/png'));
-    const fd=new FormData();fd.append('chat_id',cid);fd.append('photo',blob,`dubai-${curData?.date||''}.png`);
-    fd.append('caption',`${ed==='morning'?'🌅 早安迪拜':'🌙 夜读迪拜'} · ${curData?.date||''}\n`+(curData?.news||[]).slice(0,3).map(n=>`${n.emoji} ${n.title}`).join('\n')+'\n\n#迪拜 #UAE #华人');
-    const r=await fetch(`https://api.telegram.org/bot${tok}/sendPhoto`,{method:'POST',body:fd});
-    const j=await r.json();if(!j.ok)throw new Error(j.description);
-    setSt('ok','✅ 已发送到Telegram');setTimeout(()=>setSt('',''),4000);
-  }catch(e){setSt('err','❌ Telegram: '+e.message);}
-  finally{btn.disabled=false;btn.innerHTML='✈️ Telegram';}
+    const mode = getCurrentMode();
+    document.getElementById('modeBadge').textContent = mode === 'morning' ? '🌅 早间版' : '🌙 晚间版';
+
+    SP('📡 正在抓取阿联酋最新动态...');
+    log('🚀 开始生成流程 (模式: ' + mode + ')...');
+    
+    const settled = await Promise.allSettled(FEEDS.map(fetchOne));
+    let raw=[];
+    settled.forEach(r=>{ if(r.status==='fulfilled') raw=raw.concat(r.value); });
+    log(`✅ 总共抓取 ${raw.length} 条新闻`);
+    
+    if (raw.length === 0) {
+      throw new Error('无法抓取任何新闻源，请检查网络连接');
+    }
+    
+    const newsBlock = raw.map((n, i) => `${i+1}. [${n.src}] ${n.title} (${n.desc.substring(0, 50)}...)`).join('\n');
+
+    SP('🤖 AI 正在深度创作内容...');
+    const now=new Date();
+    const ds=(now.getMonth()+1)+'月'+now.getDate()+'日';
+
+    let prompt = `你是"迪拜今日报"主编。今天${ds}，2026年。
+
+【实时抓取的新闻源】
+${newsBlock}
+
+【严格要求】
+1. 只返回有效的 JSON，不要任何其他文本或解释
+2. 所有字符串必须正确转义（引号、换行符等）
+3. 不要使用 markdown 代码块
+4. 必须基于上述抓取的新闻进行创作，不允许编造或推测
+5. 必须包含 date, mode, cards 三个顶级字段
+
+【生成规则】
+${mode === 'morning' ? `
+【早间版】(05:00)：
+- 卡片1：今日头条（5-6条硬核资讯，直接基于抓取的新闻）
+- 卡片2：生活出行（天气|交通|福利合并，用|分隔）+ 2-3条民生福利
+` : `
+【晚间版】(21:00)：
+- 卡片1：今日锐评（基于抓取新闻的深度分析、洞察、风险提示）+ 行业拆解（房产/商业/教育内幕，基于事实）
+- 卡片2：保姆级实操（3个具体场景，包含App、路径、文件、时间、成本）
+`}
+
+【JSON 格式（必须严格遵守）】
+{
+  "date": "${ds}",
+  "mode": "${mode}",
+  "cards": [
+    {
+      "title": "卡片标题",
+      "type": "news",
+      "content": [
+        {"emoji": "📰", "title": "新闻标题", "summary": "摘要"}
+      ]
+    }
+  ]
+}`;
+
+    log('📤 发送 Prompt 到 Claude API...');
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'x-api-key':K(),
+        'anthropic-version':'2023-06-01',
+        'anthropic-dangerous-direct-browser-access':'true'
+      },
+      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:4000,messages:[{role:'user',content:prompt}]})
+    });
+
+    log('📥 收到 API 响应...');
+    const apiJson=await res.json();
+    
+    if(!apiJson.content || !apiJson.content[0]) {
+      throw new Error('API 返回格式错误: ' + JSON.stringify(apiJson));
+    }
+    
+    const rawText = apiJson.content[0].text;
+    log('原始返回长度: ' + rawText.length);
+    
+    // 【核心修复】使用堆栈式提取
+    generatedData = extractJSON(rawText);
+    log('✅ 数据解析成功，开始渲染...');
+    renderCards(generatedData);
+    document.getElementById('saveBtn').style.display='inline-flex';
+    document.getElementById('tgBtn').style.display='inline-flex';
+
+  }catch(e){
+    log('❌ 生成失败: ' + e.message);
+    document.getElementById('err').textContent='⚠️ '+e.message;
+    document.getElementById('err').style.display='block';
+    empty.style.display='block';
+  }finally{
+    SP('');
+    btn.disabled=false;
+  }
 }
 
-(function(){const h=dubaiH();switchEd(h>=5&&h<13?'morning':'evening');})();
+function renderCards(data){
+  const container=document.getElementById('cardContainer');
+  data.cards.forEach((card, idx) => {
+    const cardEl = document.createElement('div');
+    cardEl.className = 'card';
+    cardEl.id = 'card-' + idx;
+    
+    let contentHtml = '';
+    if(card.type === 'news' && card.content && Array.isArray(card.content)){
+      contentHtml = `<div class="sec"><div class="slbl"><span class="scn">${card.title}</span><span class="sen">TOP HEADLINES</span><span class="sln"></span></div>`;
+      card.content.forEach(item => {
+        contentHtml += `<div class="ni"><div class="ne">${item.emoji||'📰'}</div><div class="nb"><div class="nt">${item.title}</div><div class="ns">${item.summary}</div></div></div>`;
+      });
+      contentHtml += `</div>`;
+    } else if(card.type === 'insights'){
+      contentHtml = `<div class="sec"><div class="slbl"><span class="scn">今日锐评</span><span class="sen">SHARP INSIGHTS</span><span class="sln"></span></div><div class="rw"><div class="rl">INSIGHT</div><div class="rt">${card.insights || card.text || ''}</div></div></div>`;
+      if(card.industry) {
+        contentHtml += `<div class="sec"><div class="slbl"><span class="scn">行业拆解</span><span class="sen">INDUSTRY</span><span class="sln"></span></div><div class="mi"><strong>${card.industry.name || ''}</strong>${card.industry.analysis || ''}</div></div>`;
+      }
+    } else if(card.type === 'guides' && card.content && Array.isArray(card.content)){
+      contentHtml = `<div class="sec"><div class="slbl"><span class="scn">保姆级实操</span><span class="sen">GUIDES</span><span class="sln"></span></div>`;
+      card.content.forEach(g => {
+        const steps = Array.isArray(g.steps) ? g.steps.join('<br>') : g.steps || '';
+        contentHtml += `<div class="mi"><strong>${g.title}</strong>${steps}</div>`;
+      });
+      contentHtml += `</div>`;
+    } else {
+      contentHtml = `<div class="sec"><div class="mi">${card.text || JSON.stringify(card.content || {})}</div></div>`;
+    }
+
+    cardEl.innerHTML = `
+      <div class="tbar"></div>
+      <div class="chdr">
+        <div class="hl"><div class="cn">迪拜今日报</div><div class="en">CARD ${idx+1} · ${data.mode.toUpperCase()}</div></div>
+        <div class="hr"><div class="dt">${data.date}</div><div class="yr">2026 · DUBAI</div></div>
+      </div>
+      <div class="sbar"><div class="sdot"></div><span>官方聚合 · 深度创作 · 迪拜华人必读</span></div>
+      ${contentHtml}
+      <div class="cft"><div class="ft">© 2026 DUBAI DAILY DIGEST</div><div class="ft">PAGE ${idx+1}/${data.cards.length}</div></div>
+      <div class="bbar"></div>
+    `;
+    container.appendChild(cardEl);
+  });
+}
+
+async function saveAllImages(){
+  const btn=document.getElementById('saveBtn');
+  btn.disabled=true;
+  setShareStatus('正在生成高清图片...');
+  try{
+    const cards = document.querySelectorAll('.card');
+    for(let i=0; i<cards.length; i++){
+      const canvas = await html2canvas(cards[i], {backgroundColor:'#08080d', scale:2, useCORS:true});
+      const link = document.createElement('a');
+      link.download = `迪拜今日报_${generatedData.date}_P${i+1}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    }
+    setShareStatus('✅ 所有图片已保存');
+  }catch(e){
+    setShareStatus('❌ 保存失败：'+e.message, true);
+  }finally{
+    btn.disabled=false;
+  }
+}
+
+async function sendAllToTelegram(){
+  const token=localStorage.getItem('tg_token');
+  const chatId=localStorage.getItem('tg_chatid');
+  if(!token||!chatId){ openSettings(); return; }
+  
+  const btn=document.getElementById('tgBtn');
+  btn.disabled=true;
+  setShareStatus('正在发送多图到 Telegram...');
+  
+  try{
+    const cards = document.querySelectorAll('.card');
+    for(let i=0; i<cards.length; i++){
+      const canvas = await html2canvas(cards[i], {backgroundColor:'#08080d', scale:2, useCORS:true});
+      const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
+      const form = new FormData();
+      form.append('chat_id', chatId);
+      form.append('photo', blob, `p${i+1}.png`);
+      if(i===0) form.append('caption', `🏙️ 迪拜今日报 ${generatedData.date} ${generatedData.mode==='morning'?'🌅早间版':'🌙晚间版'}\n#迪拜 #阿联酋`);
+      
+      await fetch(`https://api.telegram.org/bot${token}/sendPhoto`, {method:'POST', body:form});
+    }
+    setShareStatus('✅ 已成功发送多图到 Telegram');
+  }catch(e){
+    setShareStatus('❌ 发送失败：'+e.message, true);
+  }finally{
+    btn.disabled=false;
+  }
+}
 </script>
 </body>
-</html><!-- deployed Mon Apr  6 10:26:02 UTC 2026 -->
+</html>
