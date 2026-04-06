@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>迪拜今日报 · Dubai Daily Digest (V4.2 稳定版)</title>
+<title>迪拜今日报 · Dubai Daily Digest (V4.3 晚报深度版)</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&display=swap');
@@ -99,248 +99,183 @@
 <div class="overlay" id="overlay">
   <div class="modal">
     <button class="close-x" onclick="closeSettings()">✕</button>
-    <div class="modal-title">⚙️ Telegram 推送设置</div>
-    <label>Bot Token</label>
-    <input id="tgToken" type="text" placeholder="1234567890:ABCdef...">
-    <div class="modal-hint">从 @BotFather 获取</div>
-    <label>Chat ID</label>
-    <input id="tgChatId" type="text" placeholder="-1001234567890 或用户ID">
-    <div class="modal-hint">从 @userinfobot 或 @getidsbot 获取</div>
+    <div class="modal-title">⚙️ 配置 Telegram 推送</div>
+    
+    <label>Telegram Bot Token</label>
+    <input type="password" id="tgToken" placeholder="从 @BotFather 获取">
+    <div class="modal-hint">格式: 123456:ABCDefGHIjklmnoPQRstUVwxyz</div>
+    
+    <label>Telegram Chat ID</label>
+    <input type="text" id="tgChatId" placeholder="您的频道或个人 ID">
+    <div class="modal-hint">频道 ID 需以 -100 开头，如: -100123456789</div>
+    
     <div class="modal-btns">
-      <button class="modal-save" onclick="saveSettings()">💾 保存</button>
+      <button class="modal-save" onclick="saveSettings()">保存配置</button>
       <button class="modal-cancel" onclick="closeSettings()">取消</button>
     </div>
   </div>
 </div>
 
-<!-- MASTHEAD -->
+<!-- HEADER -->
 <div class="mast">
-  <div class="rule"></div>
   <div class="msub">Dubai · 迪拜 · دبي · UAE</div>
   <div class="mcn">迪拜今日报</div>
   <div class="men">LOCAL LIFE · REAL NEWS · DAILY UPDATES · AI CURATED</div>
+  <div class="rule"></div>
   <div class="mode-badge" id="modeBadge">🌅 早间版</div>
   <div class="rule2"></div>
-  <div class="btn-row">
-    <button class="gbtn" id="genBtn" onclick="generate()">📰 生成今日报</button>
-    <button class="sbtn" id="saveBtn" onclick="saveAllImages()">🖼️ 保存所有图片</button>
-    <button class="tbtn" id="tgBtn" onclick="sendAllToTelegram()">✈️ 发送Telegram</button>
-    <button class="setbtn" onclick="openSettings()">⚙️ 设置</button>
-    <button class="dbgbtn" onclick="toggleDebug()">🐛 调试</button>
-  </div>
-  <div class="prog" id="prog" style="display:none"></div>
-  <div class="err" id="err" style="display:none"></div>
-  <div class="debug-log" id="debugLog"></div>
-  <div class="share-status" id="shareStatus"></div>
 </div>
 
-<!-- EMPTY STATE -->
-<div class="empty" id="empty">
-  <div class="ei">📰</div>
-  <div class="et">点击「生成今日报」</div>
-  <div class="es" style="font-size:9px;margin-top:10px;line-height:1.6;opacity:0.6">
-    🌅 早间版 (05:00)：高密度资讯、天气出行、今日福利<br>
-    🌙 晚间版 (21:00)：深度锐评、行业拆解、保姆级实操指南<br>
-    系统将自动生成多张高清卡片，确保内容丰富且清晰易读。
-  </div>
+<!-- BUTTONS -->
+<div class="btn-row">
+  <button class="gbtn" id="btn" onclick="generate()">📰 生成今日报</button>
+  <button class="sbtn" id="saveBtn" onclick="saveAllImages()">💾 保存图片</button>
+  <button class="tbtn" id="tgBtn" onclick="sendAllToTelegram()">📤 发送到 Telegram</button>
+  <button class="setbtn" onclick="openSettings()">⚙️ 设置</button>
+  <button class="dbgbtn" onclick="toggleDebug()">🐛 调试</button>
 </div>
+
+<div class="prog" id="prog"></div>
+<div class="err" id="err" style="display:none"></div>
+<div class="debug-log" id="debugLog"></div>
+<div class="share-status" id="shareStatus"></div>
 
 <!-- CARDS CONTAINER -->
 <div class="card-container" id="cardContainer"></div>
+<div class="empty" id="empty" style="display:none"><div class="ei">📭</div><div class="et">点击「生成今日报」开始</div></div>
 
 <script>
-const DEBUG = true;
+let generatedData = null;
+let debugMode = false;
+
 function log(msg) {
-  if (!DEBUG) return;
-  const el = document.getElementById('debugLog');
-  const ts = new Date().toLocaleTimeString();
-  el.textContent += `[${ts}] ${msg}\n`;
-  el.scrollTop = el.scrollHeight;
+  const debugLog = document.getElementById('debugLog');
+  if(debugMode) {
+    debugLog.innerHTML += msg + '<br>';
+    debugLog.scrollTop = debugLog.scrollHeight;
+  }
+  console.log(msg);
 }
 
 function toggleDebug() {
-  const el = document.getElementById('debugLog');
-  el.classList.toggle('show');
+  debugMode = !debugMode;
+  document.getElementById('debugLog').classList.toggle('show');
 }
 
-function K(){
-  return atob('c2stYW50LWFwaTAzLU9KWWNPZzhZMl9LN0c4bVE0aEl1Rmk=')
-       + atob('d3hWUkJGQ09sUEhIcnRaY1BveEZxdG9QTDZMTzlMbkQyOEc=')
-       + atob('WmRkVENUT1FIWWxTMkJaMHBFY0U0UXpwcExLVlEtRnpWZVJ3QUE=');
-}
+function K() { return localStorage.getItem('anthropic_key') || ''; }
 
-const FEEDS = [
-  {n:'MOI News',         u:'https://moi.gov.ae/en/rss/news.aspx', priority:10},
-  {n:'MOE Instagram',    u:'https://rsshub.app/instagram/user/economy.ae', priority:9},
-  {n:'RTA Instagram',    u:'https://rsshub.app/instagram/user/rta_dubai', priority:8},
-  {n:'Dubai Police',     u:'https://rsshub.app/instagram/user/dubaipolicehq', priority:8},
-  {n:'WAM News',         u:'https://www.wam.ae/en/rss', priority:7},
-  {n:'Gulf News UAE',    u:'https://gulfnews.com/uae/rss', priority:6},
-];
+function openSettings() { document.getElementById('overlay').classList.add('show'); }
+function closeSettings() { document.getElementById('overlay').classList.remove('show'); }
 
-function getCurrentMode(){
-  const hour = new Date().getHours();
-  if(hour >= 5 && hour < 12) return 'morning';
-  if(hour >= 21 || hour < 5) return 'evening';
-  return 'morning';
-}
-
-function openSettings(){
-  document.getElementById('tgToken').value = localStorage.getItem('tg_token')||'';
-  document.getElementById('tgChatId').value = localStorage.getItem('tg_chatid')||'';
-  document.getElementById('overlay').classList.add('show');
-}
-function closeSettings(){ document.getElementById('overlay').classList.remove('show'); }
-function saveSettings(){
-  localStorage.setItem('tg_token', document.getElementById('tgToken').value.trim());
-  localStorage.setItem('tg_chatid', document.getElementById('tgChatId').value.trim());
+function saveSettings() {
+  localStorage.setItem('tg_token', document.getElementById('tgToken').value);
+  localStorage.setItem('tg_chatid', document.getElementById('tgChatId').value);
+  localStorage.setItem('anthropic_key', prompt('请输入 Anthropic API Key (sk-ant-...):') || '');
   closeSettings();
-  setShareStatus('✅ Telegram设置已保存');
 }
 
-// 【核心修复】堆栈式 JSON 提取引擎
-function extractJSON(str) {
-  log('🔍 开始使用堆栈式算法提取 JSON...');
-  log('原始长度: ' + str.length);
+function SP(t) { document.getElementById('prog').textContent = t; }
+function setShareStatus(t, err) { document.getElementById('shareStatus').textContent = t; if(err) document.getElementById('shareStatus').style.color = '#cc4444'; }
+
+function extractJSON(text) {
+  let jsonStr = text.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
+  let braceCount = 0, startIdx = -1, endIdx = -1;
   
-  try {
-    // 移除 markdown 代码块标记
-    str = str.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
-    log('移除代码块后长度: ' + str.length);
-    
-    // 堆栈式括号匹配：找到第一个 { 和对应的最后一个 }
-    let braceCount = 0;
-    let startIdx = -1;
-    let endIdx = -1;
-    
-    for (let i = 0; i < str.length; i++) {
-      const char = str[i];
-      
-      if (char === '{') {
-        if (startIdx === -1) startIdx = i;
-        braceCount++;
-      } else if (char === '}') {
-        braceCount--;
-        if (braceCount === 0 && startIdx !== -1) {
-          endIdx = i;
-          break;
-        }
+  for(let i = 0; i < jsonStr.length; i++) {
+    if(jsonStr[i] === '{') {
+      if(startIdx === -1) startIdx = i;
+      braceCount++;
+    } else if(jsonStr[i] === '}') {
+      braceCount--;
+      if(braceCount === 0 && startIdx !== -1) {
+        endIdx = i;
+        break;
       }
     }
-    
-    if (startIdx === -1 || endIdx === -1) {
-      throw new Error('找不到完整的 JSON 对象边界');
-    }
-    
-    const jsonStr = str.substring(startIdx, endIdx + 1);
-    log('✅ 提取 JSON 子串: ' + jsonStr.length + ' 字符');
-    log('JSON 开头: ' + jsonStr.substring(0, 100));
-    
-    const result = JSON.parse(jsonStr);
-    log('✅ JSON 解析成功');
-    return result;
-    
-  } catch(e) {
-    log('❌ JSON 提取失败: ' + e.message);
-    throw e;
   }
-}
-
-async function fetchOne(feed){
-  const api='https://api.rss2json.com/v1/api.json?rss_url='+encodeURIComponent(feed.u);
-  try{
-    log(`📡 抓取 ${feed.n}...`);
-    const r = await fetch(api);
-    const j = await r.json();
-    if(j.status!=='ok') {
-      log(`⚠️ ${feed.n} 返回错误: ${j.status}`);
-      return [];
-    }
-    const items = j.items.slice(0,10).map(x=>({
-      src:feed.n,
-      title:x.title,
-      desc:x.description.replace(/<[^>]*>/g,'').slice(0,150),
-      pubDate: x.pubDate
-    }));
-    log(`✅ ${feed.n} 成功获取 ${items.length} 条`);
-    return items;
-  }catch(e){
-    log(`❌ ${feed.n} 抓取失败: ${e.message}`);
-    return [];
+  
+  if(startIdx !== -1 && endIdx !== -1) {
+    jsonStr = jsonStr.substring(startIdx, endIdx + 1);
   }
+  
+  return JSON.parse(jsonStr);
 }
 
-function SP(msg){ const e=document.getElementById('prog'); e.style.display=msg?'block':'none'; e.textContent=msg||''; }
-function setShareStatus(msg, isErr=false){ 
-  const e = document.getElementById('shareStatus');
-  e.textContent=msg;
-  e.style.color = isErr ? '#cc4444' : '#4aaa7a';
+async function fetchOne(url) {
+  try {
+    const rssUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(url)}`;
+    const res = await fetch(rssUrl);
+    const json = await res.json();
+    if(json.status === 'ok' && json.items && json.items.length > 0) {
+      return json.items.slice(0, 8).map(item => ({
+        src: url.split('/')[2],
+        title: item.title,
+        desc: (item.description || '').replace(/<[^>]*>/g, '').slice(0, 60)
+      }));
+    }
+  } catch(e) { log('❌ 抓取失败: ' + url); }
+  return [];
 }
 
-let generatedData = null;
-
-async function generate(){
-  const btn=document.getElementById('genBtn');
-  const container=document.getElementById('cardContainer');
-  const empty=document.getElementById('empty');
-  btn.disabled=true;
-  container.innerHTML='';
-  empty.style.display='none';
-  setShareStatus('');
-  document.getElementById('debugLog').textContent = '';
-
-  try{
-    const mode = getCurrentMode();
+async function generate() {
+  const btn = document.getElementById('btn');
+  const empty = document.getElementById('empty');
+  const container = document.getElementById('cardContainer');
+  
+  btn.disabled = true;
+  empty.style.display = 'none';
+  container.innerHTML = '';
+  document.getElementById('err').style.display = 'none';
+  SP('🔍 正在抓取新闻...');
+  
+  try {
+    const now = new Date();
+    const hour = now.getHours();
+    const mode = (hour >= 5 && hour < 12) ? 'morning' : 'evening';
+    
     document.getElementById('modeBadge').textContent = mode === 'morning' ? '🌅 早间版' : '🌙 晚间版';
-
-    SP('📡 正在抓取阿联酋最新动态...');
-    log('🚀 开始生成流程 (模式: ' + mode + ')...');
     
-    const settled = await Promise.allSettled(FEEDS.map(fetchOne));
-    let raw=[];
-    settled.forEach(r=>{ if(r.status==='fulfilled') raw=raw.concat(r.value); });
+    const feeds = [
+      'https://moi.gov.ae/en/rss/news.aspx',
+      'https://www.wam.ae/en/rss',
+      'https://gulfnews.com/uae/rss'
+    ];
+    
+    let raw = [];
+    const promises = feeds.map(f => fetchOne(f));
+    const settled = await Promise.allSettled(promises);
+    settled.forEach(r => { if(r.status === 'fulfilled') raw = raw.concat(r.value); });
     log(`✅ 总共抓取 ${raw.length} 条新闻`);
     
-    if (raw.length === 0) {
-      throw new Error('无法抓取任何新闻源，请检查网络连接');
-    }
+    if(raw.length === 0) throw new Error('无法抓取任何新闻源，请检查网络连接');
     
-    const newsBlock = raw.map((n, i) => `${i+1}. [${n.src}] ${n.title} (${n.desc.substring(0, 50)}...)`).join('\n');
-
-    SP('🤖 AI 正在深度创作内容...');
-    const now=new Date();
-    const ds=(now.getMonth()+1)+'月'+now.getDate()+'日';
-
-    let prompt = `你是"迪拜今日报"主编。今天${ds}，2026年。
+    const newsBlock = raw.map((n, i) => `${i+1}. [${n.src}] ${n.title} (${n.desc})`).join('\n');
+    const ds = (now.getMonth()+1) + '月' + now.getDate() + '日';
+    
+    let prompt;
+    if(mode === 'morning') {
+      prompt = `你是"迪拜今日报"主编。今天${ds}，2026年。
 
 【实时抓取的新闻源】
 ${newsBlock}
 
 【严格要求】
-1. 只返回有效的 JSON，不要任何其他文本或解释
-2. 所有字符串必须正确转义（引号、换行符等）
-3. 不要使用 markdown 代码块
-4. 必须基于上述抓取的新闻进行创作，不允许编造或推测
-5. 必须包含 date, mode, cards 三个顶级字段
+1. 只返回有效的 JSON，不要任何其他文本
+2. 所有字符串必须正确转义
+3. 必须基于上述抓取的新闻进行创作
+4. 必须包含 date, mode, cards 三个顶级字段
 
-【生成规则】
-${mode === 'morning' ? `
 【早间版】(05:00)：
-- 卡片1：今日头条（5-6条硬核资讯，直接基于抓取的新闻）
-- 卡片2：生活出行（天气|交通|福利合并，用|分隔）+ 2-3条民生福利
-` : `
-【晚间版】(21:00)：
-- 卡片1：今日锐评（基于抓取新闻的深度分析、洞察、风险提示）+ 行业拆解（房产/商业/教育内幕，基于事实）
-- 卡片2：保姆级实操（3个具体场景，包含App、路径、文件、时间、成本）
-`}
+- 卡片1：今日头条（5-6条硬核资讯）
+- 卡片2：生活出行（天气|交通|福利用|分隔）+ 2-3条民生福利
 
-【JSON 格式（必须严格遵守）】
+【JSON 格式】
 {
   "date": "${ds}",
-  "mode": "${mode}",
+  "mode": "morning",
   "cards": [
     {
-      "title": "卡片标题",
+      "title": "今日头条",
       "type": "news",
       "content": [
         {"emoji": "📰", "title": "新闻标题", "summary": "摘要"}
@@ -348,21 +283,76 @@ ${mode === 'morning' ? `
     }
   ]
 }`;
+    } else {
+      prompt = `你是"迪拜今日报"主编。今天${ds}，2026年。
 
+【实时抓取的新闻源】
+${newsBlock}
+
+【严格要求】
+1. 只返回有效的 JSON，不要任何其他文本
+2. 所有字符串必须正确转义
+3. 必须基于上述抓取的新闻进行深度创作
+4. 必须包含 date, mode, cards 三个顶级字段
+
+【晚间版】(21:00)：深度锐评 + 行业拆解 + 保姆级实操
+
+卡片1：今日锐评
+- 基于抓取新闻的深度分析、洞察、风险提示（不少于150字）
+- 行业拆解：房产/商业/教育内幕，基于事实
+
+卡片2：保姆级实操
+- 3个具体场景，包含App名称、点击路径、所需文件、预计时间、成本
+- 例如：如何在开发商直租、如何注册DED执照、如何申请黄金签证
+
+【JSON 格式】
+{
+  "date": "${ds}",
+  "mode": "evening",
+  "cards": [
+    {
+      "title": "今日锐评",
+      "type": "insights",
+      "insights": "深度分析文本（150字以上）",
+      "industry": {
+        "name": "房产/商业/教育",
+        "analysis": "行业内幕分析"
+      }
+    },
+    {
+      "title": "保姆级实操",
+      "type": "guides",
+      "content": [
+        {
+          "title": "场景1：开发商直租",
+          "steps": ["步骤1：...", "步骤2：..."]
+        }
+      ]
+    }
+  ]
+}`;
+    }
+    
+    SP('🤖 AI 正在深度创作...');
     log('📤 发送 Prompt 到 Claude API...');
-    const res=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{
-        'Content-Type':'application/json',
-        'x-api-key':K(),
-        'anthropic-version':'2023-06-01',
-        'anthropic-dangerous-direct-browser-access':'true'
+    
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': K(),
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
       },
-      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:4000,messages:[{role:'user',content:prompt}]})
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 4000,
+        messages: [{role: 'user', content: prompt}]
+      })
     });
-
+    
     log('📥 收到 API 响应...');
-    const apiJson=await res.json();
+    const apiJson = await res.json();
     
     if(!apiJson.content || !apiJson.content[0]) {
       throw new Error('API 返回格式错误: ' + JSON.stringify(apiJson));
@@ -371,44 +361,43 @@ ${mode === 'morning' ? `
     const rawText = apiJson.content[0].text;
     log('原始返回长度: ' + rawText.length);
     
-    // 【核心修复】使用堆栈式提取
     generatedData = extractJSON(rawText);
     log('✅ 数据解析成功，开始渲染...');
     renderCards(generatedData);
-    document.getElementById('saveBtn').style.display='inline-flex';
-    document.getElementById('tgBtn').style.display='inline-flex';
-
-  }catch(e){
+    document.getElementById('saveBtn').style.display = 'inline-flex';
+    document.getElementById('tgBtn').style.display = 'inline-flex';
+    
+  } catch(e) {
     log('❌ 生成失败: ' + e.message);
-    document.getElementById('err').textContent='⚠️ '+e.message;
-    document.getElementById('err').style.display='block';
-    empty.style.display='block';
-  }finally{
+    document.getElementById('err').textContent = '⚠️ ' + e.message;
+    document.getElementById('err').style.display = 'block';
+    empty.style.display = 'block';
+  } finally {
     SP('');
-    btn.disabled=false;
+    btn.disabled = false;
   }
 }
 
-function renderCards(data){
-  const container=document.getElementById('cardContainer');
+function renderCards(data) {
+  const container = document.getElementById('cardContainer');
   data.cards.forEach((card, idx) => {
     const cardEl = document.createElement('div');
     cardEl.className = 'card';
     cardEl.id = 'card-' + idx;
     
     let contentHtml = '';
-    if(card.type === 'news' && card.content && Array.isArray(card.content)){
+    if(card.type === 'news' && card.content && Array.isArray(card.content)) {
       contentHtml = `<div class="sec"><div class="slbl"><span class="scn">${card.title}</span><span class="sen">TOP HEADLINES</span><span class="sln"></span></div>`;
       card.content.forEach(item => {
         contentHtml += `<div class="ni"><div class="ne">${item.emoji||'📰'}</div><div class="nb"><div class="nt">${item.title}</div><div class="ns">${item.summary}</div></div></div>`;
       });
       contentHtml += `</div>`;
-    } else if(card.type === 'insights'){
+    } else if(card.type === 'insights') {
       contentHtml = `<div class="sec"><div class="slbl"><span class="scn">今日锐评</span><span class="sen">SHARP INSIGHTS</span><span class="sln"></span></div><div class="rw"><div class="rl">INSIGHT</div><div class="rt">${card.insights || card.text || ''}</div></div></div>`;
       if(card.industry) {
         contentHtml += `<div class="sec"><div class="slbl"><span class="scn">行业拆解</span><span class="sen">INDUSTRY</span><span class="sln"></span></div><div class="mi"><strong>${card.industry.name || ''}</strong>${card.industry.analysis || ''}</div></div>`;
       }
-    } else if(card.type === 'guides' && card.content && Array.isArray(card.content)){
+    } else if(card.type === 'guides' && card.content && Array.isArray(card.content)) {
       contentHtml = `<div class="sec"><div class="slbl"><span class="scn">保姆级实操</span><span class="sen">GUIDES</span><span class="sln"></span></div>`;
       card.content.forEach(g => {
         const steps = Array.isArray(g.steps) ? g.steps.join('<br>') : g.steps || '';
@@ -418,7 +407,7 @@ function renderCards(data){
     } else {
       contentHtml = `<div class="sec"><div class="mi">${card.text || JSON.stringify(card.content || {})}</div></div>`;
     }
-
+    
     cardEl.innerHTML = `
       <div class="tbar"></div>
       <div class="chdr">
@@ -434,53 +423,53 @@ function renderCards(data){
   });
 }
 
-async function saveAllImages(){
-  const btn=document.getElementById('saveBtn');
-  btn.disabled=true;
+async function saveAllImages() {
+  const btn = document.getElementById('saveBtn');
+  btn.disabled = true;
   setShareStatus('正在生成高清图片...');
-  try{
+  try {
     const cards = document.querySelectorAll('.card');
-    for(let i=0; i<cards.length; i++){
-      const canvas = await html2canvas(cards[i], {backgroundColor:'#08080d', scale:2, useCORS:true});
+    for(let i = 0; i < cards.length; i++) {
+      const canvas = await html2canvas(cards[i], {backgroundColor: '#08080d', scale: 2, useCORS: true});
       const link = document.createElement('a');
       link.download = `迪拜今日报_${generatedData.date}_P${i+1}.png`;
       link.href = canvas.toDataURL('image/png');
       link.click();
     }
     setShareStatus('✅ 所有图片已保存');
-  }catch(e){
-    setShareStatus('❌ 保存失败：'+e.message, true);
-  }finally{
-    btn.disabled=false;
+  } catch(e) {
+    setShareStatus('❌ 保存失败：' + e.message, true);
+  } finally {
+    btn.disabled = false;
   }
 }
 
-async function sendAllToTelegram(){
-  const token=localStorage.getItem('tg_token');
-  const chatId=localStorage.getItem('tg_chatid');
-  if(!token||!chatId){ openSettings(); return; }
+async function sendAllToTelegram() {
+  const token = localStorage.getItem('tg_token');
+  const chatId = localStorage.getItem('tg_chatid');
+  if(!token || !chatId) { openSettings(); return; }
   
-  const btn=document.getElementById('tgBtn');
-  btn.disabled=true;
+  const btn = document.getElementById('tgBtn');
+  btn.disabled = true;
   setShareStatus('正在发送多图到 Telegram...');
   
-  try{
+  try {
     const cards = document.querySelectorAll('.card');
-    for(let i=0; i<cards.length; i++){
-      const canvas = await html2canvas(cards[i], {backgroundColor:'#08080d', scale:2, useCORS:true});
+    for(let i = 0; i < cards.length; i++) {
+      const canvas = await html2canvas(cards[i], {backgroundColor: '#08080d', scale: 2, useCORS: true});
       const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
       const form = new FormData();
       form.append('chat_id', chatId);
       form.append('photo', blob, `p${i+1}.png`);
-      if(i===0) form.append('caption', `🏙️ 迪拜今日报 ${generatedData.date} ${generatedData.mode==='morning'?'🌅早间版':'🌙晚间版'}\n#迪拜 #阿联酋`);
+      if(i === 0) form.append('caption', `🏙️ 迪拜今日报 ${generatedData.date} ${generatedData.mode==='morning'?'🌅早间版':'🌙晚间版'}\n#迪拜 #阿联酋`);
       
-      await fetch(`https://api.telegram.org/bot${token}/sendPhoto`, {method:'POST', body:form});
+      await fetch(`https://api.telegram.org/bot${token}/sendPhoto`, {method: 'POST', body: form});
     }
     setShareStatus('✅ 已成功发送多图到 Telegram');
-  }catch(e){
-    setShareStatus('❌ 发送失败：'+e.message, true);
-  }finally{
-    btn.disabled=false;
+  } catch(e) {
+    setShareStatus('❌ 发送失败：' + e.message, true);
+  } finally {
+    btn.disabled = false;
   }
 }
 </script>
