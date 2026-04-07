@@ -3,478 +3,712 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>迪拜今日报 · Dubai Daily Digest (V4.4 分段稳定版)</title>
+<title>迪拜今日报 V5.1</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700;900&display=swap" rel="stylesheet">
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&display=swap');
-  *{margin:0;padding:0;box-sizing:border-box}
-  :root{--gold:#c9a84c;--gl:#f0d080;--gd:#7a5a20;--bg:#08080d;--b1:#2a2010;--b2:#1e1a0a;--tx:#d8c8a8;--td:#8a7a58;--tm:#4a3e28}
-  body{background:var(--bg);color:var(--tx);font-family:'Noto Serif SC',serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:24px 16px 60px}
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --cream:#F5F0E6;--paper:#FAF7F0;--cream2:#EDE7D5;--cream3:#E5DFC8;
+  --ink:#1C1A14;--ink2:#3D3828;--ink3:#7A7060;
+  --gold:#9A7B2F;--gold2:#C4A24A;--rule:#CEC5AD;
+  --red:#8B1A1A;--green:#1E5C1E;--blue:#1A3A6C;--purple:#4A2A7C;
+}
+body{background:var(--cream2);color:var(--ink);font-family:'Noto Serif SC',serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:20px 16px 80px}
 
-  .mast{width:100%;max-width:500px;text-align:center;margin-bottom:20px}
-  .rule{height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:9px 0}
-  .rule2{height:1px;background:linear-gradient(90deg,transparent,var(--b1),transparent);margin:9px 0}
-  .msub{font-size:9px;letter-spacing:8px;color:var(--tm);margin-bottom:4px}
-  .mcn{font-size:30px;font-weight:700;background:linear-gradient(135deg,#c9a84c,#f0d080,#a07030);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:5px;line-height:1;margin-bottom:5px}
-  .men{font-size:8px;letter-spacing:6px;color:var(--tm)}
-  .mode-badge{display:inline-block;padding:4px 12px;background:linear-gradient(135deg,#4a8a5a,#2a6a3a);border-radius:12px;font-size:9px;font-weight:700;letter-spacing:1px;margin-bottom:10px}
+/* ── 控制区 ── */
+.ctrl{width:100%;max-width:500px}
+.masthead{text-align:center;margin-bottom:14px}
+.ms-sub{font-size:9px;letter-spacing:6px;color:var(--ink3);margin-bottom:4px}
+.ms-cn{font-size:32px;font-weight:900;color:var(--ink);letter-spacing:4px;line-height:1}
+.ms-en{font-size:8px;letter-spacing:5px;color:var(--ink3);margin-top:4px;margin-bottom:8px}
+.rule-gold{height:2px;background:linear-gradient(90deg,transparent,var(--gold2),transparent);margin:8px 0}
+.rule-thin{height:1px;background:var(--rule);margin:5px 0}
 
-  .btn-row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:14px}
-  .gbtn{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#c9a84c,#a07830);border:none;color:#08080d;padding:11px 24px;font-family:'Noto Serif SC',serif;font-size:13px;font-weight:700;letter-spacing:2px;cursor:pointer;transition:opacity .2s;border-radius:1px}
-  .gbtn:disabled{opacity:.35;cursor:not-allowed}
-  .sbtn{display:none;align-items:center;gap:6px;background:#1a1a0a;border:1px solid var(--gold);color:var(--gold);padding:11px 18px;font-family:'Noto Serif SC',serif;font-size:12px;font-weight:700;letter-spacing:2px;cursor:pointer;border-radius:1px;transition:all .2s}
-  .sbtn:hover{background:rgba(201,168,76,.15)}
-  .tbtn{display:none;align-items:center;gap:6px;background:#0a1a2a;border:1px solid #2a6aaa;color:#7aaadd;padding:11px 18px;font-family:'Noto Serif SC',serif;font-size:12px;font-weight:700;letter-spacing:2px;cursor:pointer;border-radius:1px}
-  .tbtn:hover{background:rgba(42,106,170,.2)}
-  .setbtn{display:inline-flex;align-items:center;gap:5px;background:transparent;border:1px solid var(--b1);color:var(--tm);padding:9px 14px;font-size:11px;cursor:pointer;border-radius:1px;letter-spacing:1px}
-  .dbgbtn{display:inline-flex;align-items:center;gap:5px;background:transparent;border:1px solid #4a4a2a;color:#8a8a5a;padding:9px 14px;font-size:11px;cursor:pointer;border-radius:1px;letter-spacing:1px}
+.mode-row{display:flex;justify-content:center;gap:10px;margin:8px 0}
+.mode-btn{background:none;border:1px solid var(--rule);color:var(--ink3);padding:7px 22px;font-family:'Noto Serif SC',serif;font-size:12px;cursor:pointer;border-radius:2px;letter-spacing:2px;transition:all .2s}
+.mode-btn.active{background:var(--ink);color:var(--cream);border-color:var(--ink)}
 
-  .prog{margin-top:10px;font-size:11px;color:var(--gold);letter-spacing:1px;min-height:15px;animation:pulse 1.5s ease-in-out infinite}
-  .err{margin-top:8px;font-size:10px;color:#cc4444;max-width:460px;line-height:1.6;word-break:break-all}
+.next-push{font-size:10px;color:var(--ink3);text-align:center;margin:4px 0 6px;letter-spacing:1px;min-height:14px}
 
-  .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:100;align-items:center;justify-content:center;padding:20px}
-  .overlay.show{display:flex}
-  .modal{background:#0f0f0a;border:1px solid var(--b1);padding:24px;width:100%;max-width:420px;position:relative;max-height:80vh;overflow-y:auto}
-  .modal-title{font-size:14px;font-weight:700;color:var(--gold);letter-spacing:2px;margin-bottom:16px}
-  .modal label{display:block;font-size:10px;color:var(--td);letter-spacing:1px;margin-bottom:5px;margin-top:12px}
-  .modal input{width:100%;background:#08080d;border:1px solid var(--b1);color:var(--tx);padding:9px 10px;font-size:11px;font-family:'Noto Serif SC',serif;outline:none;border-radius:1px}
-  .modal input:focus{border-color:var(--gold)}
-  .modal-hint{font-size:9px;color:var(--tm);margin-top:5px;line-height:1.6}
-  .modal-btns{display:flex;gap:8px;margin-top:18px}
-  .modal-save{flex:1;background:linear-gradient(135deg,#c9a84c,#a07830);border:none;color:#08080d;padding:10px;font-weight:700;font-size:12px;cursor:pointer;font-family:'Noto Serif SC',serif;letter-spacing:2px}
-  .modal-cancel{background:transparent;border:1px solid var(--b1);color:var(--tm);padding:10px 16px;cursor:pointer;font-size:11px;font-family:'Noto Serif SC',serif}
-  .close-x{position:absolute;top:12px;right:14px;background:none;border:none;color:var(--tm);font-size:18px;cursor:pointer}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:8px}
+.gbtn{display:inline-flex;align-items:center;gap:6px;background:var(--ink);border:none;color:var(--cream);padding:12px 24px;font-family:'Noto Serif SC',serif;font-size:13px;font-weight:700;letter-spacing:2px;cursor:pointer;border-radius:2px;transition:opacity .2s}
+.gbtn:disabled{opacity:.35;cursor:not-allowed}
+.gbtn:hover:not(:disabled){opacity:.82}
+.act-btn{display:none;align-items:center;gap:5px;padding:11px 16px;font-family:'Noto Serif SC',serif;font-size:11px;font-weight:700;letter-spacing:1px;cursor:pointer;border-radius:2px;border:none;transition:opacity .2s}
+.act-btn.show{display:inline-flex}
+.act-btn:hover{opacity:.82}
+.save-btn{background:#2A5C2A;color:#fff}
+.tg-btn{background:#1A3A6C;color:#fff}
+.sec-btn{display:inline-flex;align-items:center;gap:5px;background:none;border:1px solid var(--rule);color:var(--ink3);padding:10px 14px;font-family:'Noto Serif SC',serif;font-size:11px;cursor:pointer;border-radius:2px;letter-spacing:1px;transition:all .2s}
+.sec-btn:hover{border-color:var(--ink3)}
 
-  .debug-log{background:#0a0a08;border:1px solid #2a2a1a;padding:12px;font-size:9px;color:#8a8a6a;font-family:monospace;max-height:200px;overflow-y:auto;margin-top:10px;line-height:1.4;display:none}
-  .debug-log.show{display:block}
+.prog{margin-top:12px;font-size:11px;color:var(--gold);letter-spacing:1px;min-height:16px;text-align:center;animation:pulse 1.5s ease-in-out infinite}
+.prog:empty{animation:none}
+.err-box{display:none;margin-top:10px;background:#FDF0F0;border:1px solid #E0B0B0;border-radius:3px;padding:12px 14px;font-size:12px;color:var(--red);line-height:1.7}
+.err-retry{display:inline-block;margin-top:6px;background:var(--red);color:#fff;border:none;padding:5px 14px;font-size:10px;cursor:pointer;border-radius:2px;font-family:'Noto Serif SC',serif;letter-spacing:1px}
+.share-st{margin-top:8px;font-size:11px;min-height:16px;text-align:center;letter-spacing:1px}
+.dbg-log{display:none;background:#F0EDE4;border:1px solid var(--rule);padding:10px;font-size:9px;color:var(--ink3);font-family:monospace;max-height:150px;overflow-y:auto;margin-top:8px;line-height:1.5;border-radius:2px}
+.dbg-log.show{display:block}
 
-  .card-container{width:100%;max-width:500px;margin-top:16px;display:flex;flex-direction:column;gap:20px}
-  .card{width:100%;background:linear-gradient(160deg,#141108 0%,#0d0d08 50%,#111008 100%);border:1px solid var(--b1);box-shadow:0 0 60px rgba(201,168,76,.08),0 20px 60px rgba(0,0,0,.9);animation:fadeIn .5s ease;position:relative;overflow:hidden}
-  .tbar{height:3px;background:linear-gradient(90deg,transparent 5%,var(--gold) 30%,var(--gl) 50%,var(--gold) 70%,transparent 95%)}
-  .bbar{height:2px;background:linear-gradient(90deg,transparent 10%,var(--gd) 40%,var(--gold) 50%,var(--gd) 60%,transparent 90%)}
-  .chdr{padding:14px 20px 10px;display:flex;justify-content:space-between;align-items:flex-end;border-bottom:1px solid var(--b2)}
-  .hl .cn{font-size:17px;font-weight:700;color:var(--gold);letter-spacing:3px}
-  .hl .en{font-size:7px;letter-spacing:4px;color:var(--tm);margin-top:3px}
-  .hr .dt{font-size:17px;font-weight:700;color:var(--gold);text-align:right}
-  .hr .yr{font-size:8px;letter-spacing:2px;color:var(--tm);margin-top:3px;text-align:right}
-  .sbar{padding:5px 20px;background:rgba(201,168,76,.03);border-bottom:1px solid var(--b2);font-size:8px;color:var(--tm);display:flex;align-items:center;gap:5px}
-  .sdot{width:4px;height:4px;border-radius:50%;background:#4a8a5a;flex-shrink:0;animation:blink 2s infinite}
-  
-  .sec{padding:12px 20px 8px}
-  .slbl{display:flex;align-items:center;gap:7px;margin-bottom:10px}
-  .scn{font-size:12px;font-weight:700;color:var(--gold);letter-spacing:2px}
-  .sen{font-size:7px;letter-spacing:4px;color:var(--tm)}
-  .sln{flex:1;height:1px;background:var(--b2)}
-  
-  .ni{display:flex;gap:10px;margin-bottom:10px;padding:8px 10px;background:rgba(255,255,255,.015);border-left:2px solid var(--b1)}
-  .ne{font-size:15px;line-height:1.5;flex-shrink:0}
-  .nb{flex:1;min-width:0}
-  .nt{font-size:13px;font-weight:700;color:#d4c4a0;line-height:1.4;margin-bottom:3px}
-  .ns{font-size:11px;color:var(--td);line-height:1.6}
-  
-  .rw{margin:0 20px 12px;padding:12px 15px;background:rgba(201,168,76,.04);border:1px solid var(--b1);position:relative}
-  .rl{position:absolute;top:-8px;left:10px;background:#0d0d08;padding:0 8px;font-size:9px;font-weight:700;color:var(--gold);letter-spacing:2px}
-  .rt{font-size:12px;line-height:1.8;color:#c4b490;font-style:italic;padding-top:2px}
-  
-  .mi{margin-bottom:8px;padding:8px 12px;background:linear-gradient(90deg,rgba(201,168,76,.07),transparent 80%);border-left:2px solid var(--gd);font-size:11px;color:#b09a6a;line-height:1.7}
-  .mi strong{color:var(--gold);font-size:12px;display:block;margin-bottom:4px}
-  
-  .cft{border-top:1px solid var(--b2);padding:8px 20px;display:flex;justify-content:space-between}
-  .ft{font-size:8px;letter-spacing:2px;color:var(--tm)}
+.empty{width:100%;max-width:500px;text-align:center;padding:60px 20px;border:1px dashed var(--rule);margin-top:14px;color:var(--ink3);border-radius:3px;background:var(--paper)}
+.empty-icon{font-size:44px;margin-bottom:12px}
+.empty-txt{font-size:12px;letter-spacing:2px}
 
-  .share-status{margin-top:10px;font-size:11px;color:#4aaa7a;letter-spacing:1px;min-height:16px;text-align:center}
-  .empty{width:100%;max-width:500px;text-align:center;padding:44px 20px;border:1px dashed var(--b1);margin-top:16px;color:var(--tm)}
-  .ei{font-size:36px;margin-bottom:12px}
-  .et{font-size:12px;letter-spacing:2px}
+/* ── 卡片 ── */
+#wrap{width:100%;max-width:500px;margin-top:18px;display:flex;flex-direction:column;gap:24px}
+.card{width:100%;background:var(--paper);border:1px solid var(--rule);box-shadow:0 6px 32px rgba(0,0,0,.12),2px 2px 0 #D0C8B0;overflow:hidden;animation:fadeIn .5s ease}
+.topbar{height:4px;background:linear-gradient(90deg,#7A5A20,var(--gold2),#f0d080,var(--gold2),#7A5A20)}
+.botbar{height:2px;background:linear-gradient(90deg,transparent,var(--gold2),transparent)}
 
-  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
-  @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
-  @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.c-head{padding:13px 18px 9px;text-align:center;border-bottom:3px double var(--ink)}
+.c-sub{font-size:8px;letter-spacing:5px;color:var(--ink3);margin-bottom:2px}
+.c-cn{font-size:23px;font-weight:900;color:var(--ink);letter-spacing:3px;line-height:1}
+.c-en{font-size:7px;letter-spacing:5px;color:var(--ink3);margin-top:3px;margin-bottom:7px}
+.c-meta{display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--ink);border-bottom:1px solid var(--ink);padding:4px 0;font-size:9px;color:var(--ink2);letter-spacing:1px}
+.c-meta-m{font-weight:700;color:var(--gold);font-size:9px;letter-spacing:2px}
+
+.c-weather{background:var(--ink2);color:var(--cream);display:flex;justify-content:center;align-items:center;gap:18px;padding:8px 18px;font-size:11px;letter-spacing:1px}
+
+/* 新闻块 */
+.sec-lbl{display:flex;align-items:center;gap:10px;padding:11px 18px 3px}
+.sl-cn{font-size:11px;font-weight:700;color:var(--gold);letter-spacing:3px}
+.sl-en{font-size:7px;letter-spacing:4px;color:var(--ink3)}
+.sl-line{flex:1;height:1px;background:var(--rule)}
+
+.news-list{padding:2px 18px 10px}
+.ni{display:flex;gap:11px;padding:11px 0;border-bottom:1px solid var(--cream3)}
+.ni:last-child{border-bottom:none}
+.ni-num{font-size:20px;font-weight:900;color:var(--rule);line-height:1;flex-shrink:0;width:24px;padding-top:2px}
+.ni-body{flex:1;min-width:0}
+.ni-cat{display:inline-block;font-size:8px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:2px 7px;margin-bottom:5px;color:#fff;border-radius:1px}
+.cat-全球,.cat-World{background:#3A5C2A}
+.cat-迪拜,.cat-Dubai{background:var(--blue)}
+.cat-经济,.cat-Economy{background:var(--green)}
+.cat-政治,.cat-Politics{background:var(--red)}
+.cat-科技,.cat-Tech{background:var(--purple)}
+.cat-社会,.cat-Society{background:#2A5C5C}
+.cat-体育,.cat-Sports{background:#7C3A2A}
+.cat-商业,.cat-Business{background:#5C3A2A}
+.cat-民生,.cat-Life{background:#3A4A5C}
+.cat-默认{background:var(--ink2)}
+.ni-title{font-size:15px;font-weight:700;color:var(--ink);line-height:1.4;margin-bottom:4px}
+.ni-body-t{font-size:12px;line-height:1.85;color:var(--ink2)}
+.ni-src{font-size:9px;color:var(--ink3);margin-top:4px;font-style:italic}
+
+/* 锐评框 */
+.c-insight{margin:4px 18px 14px;background:rgba(154,123,47,.07);border:1px solid rgba(196,162,74,.35);padding:14px 15px;border-radius:2px;position:relative}
+.ins-tag{position:absolute;top:-8px;left:12px;background:var(--paper);padding:0 8px;font-size:8px;font-weight:700;color:var(--gold);letter-spacing:3px}
+.ins-text{font-size:12.5px;line-height:1.95;color:var(--ink2);font-style:italic}
+
+/* 赚钱机会 */
+.opp-list{padding:2px 18px 12px}
+.opp-item{display:flex;gap:12px;padding:11px 0;border-bottom:1px solid var(--cream3);align-items:flex-start}
+.opp-item:last-child{border-bottom:none}
+.opp-tag{flex-shrink:0;font-size:8px;font-weight:700;letter-spacing:1px;padding:3px 8px;background:var(--gold2);color:#fff;border-radius:1px;margin-top:2px;white-space:nowrap}
+.opp-body{flex:1}
+.opp-title{font-size:14px;font-weight:700;color:var(--ink);line-height:1.3;margin-bottom:4px}
+.opp-desc{font-size:12px;line-height:1.8;color:var(--ink2)}
+
+/* 实操步骤 */
+.howto-q{margin:4px 18px 10px;padding:10px 14px;background:rgba(26,58,108,.06);border-left:3px solid var(--blue);font-size:13px;font-weight:700;color:var(--blue);line-height:1.4}
+.howto-steps{padding:0 18px 4px}
+.step-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--cream3);align-items:flex-start}
+.step-item:last-child{border-bottom:none}
+.step-num{flex-shrink:0;width:22px;height:22px;background:var(--ink);color:var(--cream);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;margin-top:1px}
+.step-text{flex:1;font-size:12px;line-height:1.8;color:var(--ink2)}
+.howto-tip{margin:4px 18px 14px;padding:10px 13px;background:rgba(154,123,47,.08);border:1px solid rgba(196,162,74,.3);border-radius:2px;font-size:11px;color:var(--ink2);line-height:1.7}
+.howto-tip strong{color:var(--gold);display:block;font-size:10px;letter-spacing:2px;margin-bottom:3px}
+
+/* 市场行情 */
+.mkt-grid{padding:4px 18px 14px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.mkt-item{background:var(--cream2);border-radius:2px;padding:9px 11px;border:1px solid var(--rule)}
+.mkt-label{font-size:8px;color:var(--ink3);letter-spacing:1px;margin-bottom:3px;text-transform:uppercase}
+.mkt-val{font-size:15px;font-weight:700;color:var(--ink);line-height:1.2}
+.mkt-sub{font-size:8px;color:var(--ink3);margin-top:2px}
+
+.c-foot{border-top:1px solid var(--rule);display:flex;justify-content:space-between;padding:6px 18px;font-size:8px;letter-spacing:2px;color:var(--ink3);background:var(--cream2)}
+
+/* 弹窗 */
+.overlay{display:none;position:fixed;inset:0;background:rgba(28,26,20,.78);z-index:100;align-items:center;justify-content:center;padding:20px}
+.overlay.show{display:flex}
+.modal{background:var(--paper);border:1px solid var(--rule);padding:26px;width:100%;max-width:460px;position:relative;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3);border-radius:2px}
+.modal-title{font-size:16px;font-weight:700;color:var(--ink);margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--rule)}
+.modal label{display:block;font-size:9px;color:var(--ink3);letter-spacing:2px;text-transform:uppercase;margin-bottom:5px;margin-top:14px}
+.modal input[type=text],.modal input[type=password],.modal input[type=time]{width:100%;background:#fff;border:1px solid var(--rule);color:var(--ink);padding:10px 12px;font-size:12px;font-family:'Noto Serif SC',serif;outline:none;border-radius:2px}
+.modal input:focus{border-color:var(--gold)}
+.modal-hint{font-size:9px;color:var(--ink3);margin-top:4px;line-height:1.6}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;margin-top:14px;padding:10px 12px;background:var(--cream2);border-radius:2px}
+.toggle-label{font-size:12px;color:var(--ink2)}
+.toggle{width:40px;height:22px;background:var(--rule);border-radius:11px;cursor:pointer;position:relative;transition:background .2s;border:none;flex-shrink:0}
+.toggle.on{background:var(--green)}
+.toggle::after{content:'';position:absolute;width:18px;height:18px;background:#fff;border-radius:50%;top:2px;left:2px;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.toggle.on::after{left:20px}
+.warn-box{background:#FDF5E6;border:1px solid #E8D090;border-radius:2px;padding:8px 12px;font-size:10px;color:#7A5A20;margin-top:10px;line-height:1.6}
+.modal-btns{display:flex;gap:8px;margin-top:18px}
+.modal-save{flex:1;background:var(--ink);border:none;color:var(--cream);padding:11px;font-weight:700;font-size:12px;cursor:pointer;font-family:'Noto Serif SC',serif;letter-spacing:2px;border-radius:2px}
+.modal-cancel{background:none;border:1px solid var(--rule);color:var(--ink3);padding:11px 14px;cursor:pointer;font-size:11px;font-family:'Noto Serif SC',serif;border-radius:2px}
+.close-x{position:absolute;top:14px;right:16px;background:none;border:none;color:var(--ink3);font-size:20px;cursor:pointer;line-height:1}
+
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 </style>
 </head>
 <body>
 
+<!-- 弹窗 -->
 <div class="overlay" id="overlay">
   <div class="modal">
     <button class="close-x" onclick="closeSettings()">✕</button>
-    <div class="modal-title">⚙️ 配置 Telegram 推送</div>
+    <div class="modal-title">⚙️ 配置</div>
+
+    <label>Anthropic API Key</label>
+    <input type="password" id="cfgKey" placeholder="sk-ant-api03-...">
+    <div class="modal-hint">在 console.anthropic.com 获取，用于新闻生成</div>
+    <div class="warn-box">🔒 Key 仅保存在浏览器本地（localStorage），不上传任何服务器</div>
+
     <label>Telegram Bot Token</label>
-    <input type="password" id="tgToken" placeholder="从 @BotFather 获取">
-    <div class="modal-hint">格式: 123456:ABCDefGHIjklmnoPQRstUVwxyz</div>
+    <input type="password" id="cfgTT" placeholder="123456:ABCdef...">
+    <div class="modal-hint">从 @BotFather 获取</div>
+
     <label>Telegram Chat ID</label>
-    <input type="text" id="tgChatId" placeholder="您的频道或个人 ID">
-    <div class="modal-hint">频道 ID 需以 -100 开头，如: -100123456789</div>
+    <input type="text" id="cfgTC" placeholder="-100123456789">
+    <div class="modal-hint">频道以 -100 开头；个人 ID 为纯数字</div>
+
+    <div class="toggle-row">
+      <span class="toggle-label">⏰ 定时自动推送（需页面保持打开）</span>
+      <button class="toggle" id="autoToggle" onclick="toggleAuto()"></button>
+    </div>
+    <div class="modal-hint" style="margin-top:6px">开启后每天 07:00 自动发早间版，19:00 自动发晚间版（迪拜时间 UTC+4）</div>
+
     <div class="modal-btns">
-      <button class="modal-save" onclick="saveSettings()">保存配置</button>
+      <button class="modal-save" onclick="saveSettings()">💾 保存</button>
       <button class="modal-cancel" onclick="closeSettings()">取消</button>
     </div>
   </div>
 </div>
 
-<div class="mast">
-  <div class="msub">Dubai · 迪拜 · دبي · UAE</div>
-  <div class="mcn">迪拜今日报</div>
-  <div class="men">LOCAL LIFE · REAL NEWS · DAILY UPDATES · AI CURATED</div>
-  <div class="rule"></div>
-  <div class="mode-badge" id="modeBadge">🌅 早间版</div>
-  <div class="rule2"></div>
+<!-- 主界面 -->
+<div class="ctrl">
+  <div class="masthead">
+    <div class="ms-sub">Dubai · 迪拜 · دبي · UAE</div>
+    <div class="ms-cn">迪拜今日报</div>
+    <div class="ms-en">LOCAL LIFE · REAL NEWS · DAILY UPDATES · AI CURATED</div>
+    <div class="rule-gold"></div>
+    <div class="mode-row">
+      <button class="mode-btn" id="btnM" onclick="setMode('morning')">🌅 早间版</button>
+      <button class="mode-btn" id="btnE" onclick="setMode('evening')">🌆 晚间版</button>
+    </div>
+    <div class="next-push" id="nextPush"></div>
+    <div class="rule-thin"></div>
+  </div>
+
+  <div class="btn-row">
+    <button class="gbtn" id="genBtn" onclick="generate()">📰 生成今日报</button>
+    <button class="act-btn save-btn" id="saveBtn" onclick="saveCards()">💾 保存图片</button>
+    <button class="act-btn tg-btn" id="tgBtn" onclick="sendTelegram()">📤 发送 Telegram</button>
+    <button class="sec-btn" onclick="openSettings()">⚙️ 设置</button>
+    <button class="sec-btn" onclick="toggleDebug()">🐛 调试</button>
+  </div>
+
+  <div class="prog" id="prog"></div>
+  <div class="err-box" id="errBox"></div>
+  <div class="share-st" id="shareSt"></div>
+  <div class="dbg-log" id="dbgLog"></div>
 </div>
 
-<div class="btn-row">
-  <button class="gbtn" id="btn" onclick="generate()">📰 生成今日报</button>
-  <button class="sbtn" id="saveBtn" onclick="saveAllImages()">💾 保存图片</button>
-  <button class="tbtn" id="tgBtn" onclick="sendAllToTelegram()">📤 发送到 Telegram</button>
-  <button class="setbtn" onclick="openSettings()">⚙️ 设置</button>
-  <button class="dbgbtn" onclick="toggleDebug()">🐛 调试</button>
+<div class="empty" id="empty">
+  <div class="empty-icon">📭</div>
+  <div class="empty-txt">点击「生成今日报」开始</div>
 </div>
-
-<div class="prog" id="prog"></div>
-<div class="err" id="err" style="display:none"></div>
-<div class="debug-log" id="debugLog"></div>
-<div class="share-status" id="shareStatus"></div>
-
-<div class="card-container" id="cardContainer"></div>
-<div class="empty" id="empty" style="display:none"><div class="ei">📭</div><div class="et">点击「生成今日报」开始</div></div>
+<div id="wrap"></div>
 
 <script>
-let generatedData = null;
-let debugMode = false;
+// ══════════════════════════════════════
+// 常量
+// ══════════════════════════════════════
+const HOW_TO = [
+  { q:'如何在迪拜开发商处直租房屋？', en:'Rent directly from developer in Dubai' },
+  { q:'迪拜哪里可以免费练英语？',    en:'Free English practice spots in Dubai' },
+  { q:'如何在迪拜注册自己的公司？',  en:'How to register a company in Dubai' },
+  { q:'迪拜黄金街购金完整攻略',      en:'Dubai Gold Souk buying guide' },
+  { q:'迪拜 RTA 公共交通全攻略',    en:'Dubai RTA metro & bus complete guide' },
+  { q:'迪拜华人求职最全渠道汇总',    en:'Job hunting channels for Chinese in Dubai' },
+  { q:'迪拜免费/低价医疗看诊指南',   en:'Affordable healthcare guide in Dubai' },
+];
 
-function log(msg) {
-  const debugLog = document.getElementById('debugLog');
-  if(debugMode) {
-    debugLog.innerHTML += msg + '<br>';
-    debugLog.scrollTop = debugLog.scrollHeight;
-  }
-  console.log(msg);
+// ══════════════════════════════════════
+// 状态
+// ══════════════════════════════════════
+let mode = dubaiHour() < 14 ? 'morning' : 'evening'; // 迪拜时间14点前为早间
+let gData = null;
+let debugOn = false;
+let autoOn = lsGet('auto') === '1';
+let schedTimer = null;
+
+// ══════════════════════════════════════
+// 工具函数
+// ══════════════════════════════════════
+function dubaiNow(){ return new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Dubai'})); }
+function dubaiHour(){ return dubaiNow().getHours(); }
+function dubaiDate(){ const d=dubaiNow(); return `${d.getMonth()+1}月${d.getDate()}日`; }
+function dubaiFull(){ const d=dubaiNow(); return `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日`; }
+function dubaiDateEn(){ return dubaiNow().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'}); }
+function todayKey(){ const d=dubaiNow(); return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`; }
+
+const $ = id => document.getElementById(id);
+function log(m){ console.log(m); if(debugOn){ $('dbgLog').innerHTML+=`[${new Date().toLocaleTimeString('zh')}] ${m}<br>`; $('dbgLog').scrollTop=9999; } }
+function SP(t){ $('prog').textContent=t; }
+function showErr(msg, retry=true){
+  $('errBox').innerHTML = '⚠️ '+msg + (retry?'<br><button class="err-retry" onclick="generate()">↻ 重试</button>':'');
+  $('errBox').style.display='block';
+  log('ERR: '+msg);
+}
+function hideErr(){ $('errBox').style.display='none'; }
+function setSt(t,ok=true){ $('shareSt').textContent=t; $('shareSt').style.color=ok?'#1E5C1E':'#8B1A1A'; }
+
+function lsGet(k){ try{return localStorage.getItem('ddn_'+k)||''}catch(e){return ''} }
+function lsSet(k,v){ try{localStorage.setItem('ddn_'+k,v)}catch(e){} }
+
+// ══════════════════════════════════════
+// 模式 & UI 初始化
+// ══════════════════════════════════════
+function setMode(m){
+  mode=m;
+  $('btnM').classList.toggle('active',m==='morning');
+  $('btnE').classList.toggle('active',m==='evening');
+}
+setMode(mode);
+
+function toggleDebug(){
+  debugOn=!debugOn;
+  $('dbgLog').classList.toggle('show');
 }
 
-function toggleDebug() {
-  debugMode = !debugMode;
-  document.getElementById('debugLog').classList.toggle('show');
+// ══════════════════════════════════════
+// 设置弹窗
+// ══════════════════════════════════════
+function openSettings(){
+  $('cfgKey').value=lsGet('ak');
+  $('cfgTT').value=lsGet('tt');
+  $('cfgTC').value=lsGet('tc');
+  $('autoToggle').classList.toggle('on', autoOn);
+  $('overlay').classList.add('show');
 }
-
-function K() { return localStorage.getItem('anthropic_key') || ''; }
-function openSettings() { document.getElementById('overlay').classList.add('show'); }
-function closeSettings() { document.getElementById('overlay').classList.remove('show'); }
-
-function saveSettings() {
-  localStorage.setItem('tg_token', document.getElementById('tgToken').value);
-  localStorage.setItem('tg_chatid', document.getElementById('tgChatId').value);
-  localStorage.setItem('anthropic_key', prompt('请输入 Anthropic API Key (sk-ant-...):') || '');
+function closeSettings(){ $('overlay').classList.remove('show'); }
+function toggleAuto(){
+  autoOn=!autoOn;
+  $('autoToggle').classList.toggle('on',autoOn);
+}
+function saveSettings(){
+  const k=$('cfgKey').value.trim();
+  if(k && !k.startsWith('sk-ant-')){ alert('API Key 格式有误，应以 sk-ant- 开头'); return; }
+  if(k) lsSet('ak',k);
+  const t=$('cfgTT').value.trim(), c=$('cfgTC').value.trim();
+  if(t) lsSet('tt',t);
+  if(c) lsSet('tc',c);
+  lsSet('auto', autoOn?'1':'0');
   closeSettings();
+  setSt('✅ 配置已保存');
+  startScheduler();
 }
 
-function SP(t) { document.getElementById('prog').textContent = t; }
-function setShareStatus(t, err) { 
-  document.getElementById('shareStatus').textContent = t; 
-  if(err) document.getElementById('shareStatus').style.color = '#cc4444'; 
-  else document.getElementById('shareStatus').style.color = '#4aaa7a';
+// ══════════════════════════════════════
+// JSON 解析（稳健）
+// ══════════════════════════════════════
+function parseAI(text){
+  text=text.replace(/```json\s*/gi,'').replace(/```\s*/g,'').trim();
+  let depth=0,start=-1,end=-1;
+  for(let i=0;i<text.length;i++){
+    if(text[i]==='{'){if(start===-1)start=i;depth++;}
+    else if(text[i]==='}'){depth--;if(depth===0&&start!==-1){end=i;break;}}
+  }
+  if(start===-1||end===-1) throw new Error('响应中未找到 JSON。原文片段：'+text.slice(0,300));
+  let s=text.substring(start,end+1);
+  s=s.replace(/,\s*([}\]])/g,'$1'); // 修复尾逗号
+  try{ return JSON.parse(s); }
+  catch(e){ throw new Error('JSON解析失败：'+e.message+'\n片段：'+s.slice(-200)); }
 }
 
-function tryFixJSON(text) {
-  let jsonStr = text.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
-  let braceCount = 0, startIdx = -1, endIdx = -1;
-  
-  for(let i = 0; i < jsonStr.length; i++) {
-    if(jsonStr[i] === '{') {
-      if(startIdx === -1) startIdx = i;
-      braceCount++;
-    } else if(jsonStr[i] === '}') {
-      braceCount--;
-      if(braceCount === 0 && startIdx !== -1) {
-        endIdx = i;
-        break;
-      }
+// ══════════════════════════════════════
+// AI 调用（含 web_search，3次重试）
+// ══════════════════════════════════════
+async function callAI(prompt, attempt=1){
+  const key=lsGet('ak');
+  if(!key) throw new Error('未配置 API Key，请点击「⚙️ 设置」填写');
+
+  let res, json;
+  try{
+    res = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'x-api-key':key,
+        'anthropic-version':'2023-06-01',
+        'anthropic-dangerous-direct-browser-access':'true'
+      },
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:3000,
+        tools:[{type:'web_search_20250305',name:'web_search'}],
+        messages:[{role:'user',content:prompt}]
+      })
+    });
+    json=await res.json();
+  } catch(e){
+    if(attempt<3){ log(`网络错误，第${attempt}次重试...`); await sleep(2000*attempt); return callAI(prompt,attempt+1); }
+    throw new Error('网络请求失败：'+e.message);
+  }
+
+  if(json.error){
+    const t=json.error.type||'',m=json.error.message||'';
+    if(t==='authentication_error') throw new Error('API Key 无效或已过期，请在设置中更新');
+    if(t==='rate_limit_error'){
+      if(attempt<3){ await sleep(5000); return callAI(prompt,attempt+1); }
+      throw new Error('请求频率过高，请1分钟后重试');
     }
-  }
-  
-  if(startIdx !== -1 && endIdx !== -1) {
-    jsonStr = jsonStr.substring(startIdx, endIdx + 1);
-  }
-  
-  // 【自动补全】如果 JSON 被截断，尝试补齐
-  if(braceCount > 0) {
-    jsonStr += '}}'.repeat(braceCount);
-    log('⚠️ JSON 被截断，已自动补齐');
-  }
-  
-  return jsonStr;
-}
-
-async function fetchOne(url) {
-  try {
-    const rssUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(url)}`;
-    const res = await fetch(rssUrl);
-    const json = await res.json();
-    if(json.status === 'ok' && json.items && json.items.length > 0) {
-      return json.items.slice(0, 8).map(item => ({
-        src: url.split('/')[2],
-        title: item.title,
-        desc: (item.description || '').replace(/<[^>]*>/g, '').slice(0, 60)
-      }));
+    if(t==='overloaded_error'){
+      if(attempt<3){ await sleep(3000); return callAI(prompt,attempt+1); }
+      throw new Error('Anthropic 服务繁忙，请稍后重试');
     }
-  } catch(e) { log('❌ 抓取失败: ' + url); }
-  return [];
-}
-
-async function callAI(prompt) {
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': K(),
-      'anthropic-version': '2023-06-01',
-      'anthropic-dangerous-direct-browser-access': 'true'
-    },
-    body: JSON.stringify({
-      model: 'claude-haiku-4-5-20251001',
-      max_tokens: 2000,
-      messages: [{role: 'user', content: prompt}]
-    })
-  });
-  
-  const apiJson = await res.json();
-  if(!apiJson.content || !apiJson.content[0]) {
-    throw new Error('API 返回格式错误: ' + JSON.stringify(apiJson));
+    throw new Error('API错误: '+(m||JSON.stringify(json.error)));
   }
-  return apiJson.content[0].text;
+
+  const blocks=json.content||[];
+  log(`API: ${blocks.map(b=>b.type).join('+')} | stop=${json.stop_reason}`);
+  const text=blocks.filter(b=>b.type==='text').map(b=>b.text||'').join('');
+  if(!text.trim()) throw new Error('AI 未返回文字内容（stop_reason:'+json.stop_reason+'）');
+  log('文字长度: '+text.length);
+  return text;
 }
 
-async function generate() {
-  const btn = document.getElementById('btn');
-  const empty = document.getElementById('empty');
-  const container = document.getElementById('cardContainer');
-  
-  btn.disabled = true;
-  empty.style.display = 'none';
-  container.innerHTML = '';
-  document.getElementById('err').style.display = 'none';
-  SP('🔍 正在抓取新闻...');
-  
-  try {
-    const now = new Date();
-    const hour = now.getHours();
-    const mode = (hour >= 5 && hour < 12) ? 'morning' : 'evening';
-    const ds = (now.getMonth()+1) + '月' + now.getDate() + '日';
-    
-    document.getElementById('modeBadge').textContent = mode === 'morning' ? '🌅 早间版' : '🌙 晚间版';
-    
-    const feeds = [
-      'https://moi.gov.ae/en/rss/news.aspx',
-      'https://www.wam.ae/en/rss',
-      'https://gulfnews.com/uae/rss'
-    ];
-    
-    let raw = [];
-    const promises = feeds.map(f => fetchOne(f));
-    const settled = await Promise.allSettled(promises);
-    settled.forEach(r => { if(r.status === 'fulfilled') raw = raw.concat(r.value); });
-    log(`✅ 总共抓取 ${raw.length} 条新闻`);
-    
-    if(raw.length === 0) throw new Error('无法抓取任何新闻源，请检查网络连接');
-    
-    const newsBlock = raw.map((n, i) => `${i+1}. [${n.src}] ${n.title}`).join('\n');
-    
-    generatedData = { date: ds, mode: mode, cards: [] };
-    
-    if(mode === 'morning') {
-      SP('🤖 AI 正在生成早间版...');
-      const prompt = `你是"迪拜今日报"主编。今天${ds}，2026年。
+function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
 
-【实时新闻】
-${newsBlock}
+// ══════════════════════════════════════
+// 主生成
+// ══════════════════════════════════════
+async function generate(){
+  const btn=$('genBtn'),empty=$('empty'),wrap=$('wrap');
+  btn.disabled=true;
+  empty.style.display='none';
+  wrap.innerHTML='';
+  hideErr(); setSt('');
+  $('saveBtn').classList.remove('show');
+  $('tgBtn').classList.remove('show');
+  $('dbgLog').innerHTML='';
 
-生成早间版（05:00）：高密度资讯、天气出行、民生福利。
+  const isMorning = mode==='morning';
+  const dateStr   = dubaiDate();
+  const dateFull  = dubaiFull();
+  const dateEn    = dubaiDateEn();
+  const topic     = HOW_TO[dubaiNow().getDay()]; // 按周几轮换
 
-必须返回有效的 JSON：
+  try{
+    SP(isMorning?'🔍 搜索迪拜今晨新闻与商机...':'🔍 搜索迪拜今日新闻与实操信息...');
+
+    let prompt;
+    if(isMorning){
+      prompt=`你是"迪拜今日报"主编。今天${dateFull}，迪拜早间。
+
+请立即调用 web_search 工具，分别搜索：
+1. "Dubai UAE morning news today ${dubaiNow().getFullYear()}"
+2. "迪拜 新闻 今日 ${dubaiNow().getMonth()+1}月"
+3. "Dubai weather today"
+4. "Dubai business investment opportunity ${dubaiNow().getFullYear()}"
+5. "UAE economy real estate jobs today"
+
+基于搜索到的真实内容，生成早间报纸。内容面向迪拜华人，语言简练实用。
+
+新闻来源必须真实：Gulf News / Khaleej Times / The National / WAM / Reuters / BBC / Bloomberg / CNN / AP 等。
+
+只返回纯 JSON（不加代码块、不加任何说明文字）：
 {
-  "cards": [
-    {
-      "title": "今日头条",
-      "type": "news",
-      "content": [
-        {"emoji": "📰", "title": "新闻标题", "summary": "摘要"}
-      ]
-    }
+  "date": "${dateStr}",
+  "dateEn": "${dateEn}",
+  "edition": "morning",
+  "weather": { "temp": "38", "condition": "晴间多云", "humidity": "55", "uv": "极强" },
+  "headlines": [
+    { "category": "全球", "title": "标题（16字内）", "body": "正文2-3句含具体数字细节约80字", "source": "Reuters" },
+    { "category": "迪拜", "title": "标题（16字内）", "body": "正文约80字", "source": "Gulf News" },
+    { "category": "经济", "title": "标题（16字内）", "body": "正文约80字", "source": "Bloomberg" }
+  ],
+  "insight": "今日锐评：对当前迪拜或全球最重要趋势的观点评论，有具体判断，约120字",
+  "opportunities": [
+    { "tag": "房产", "title": "机会标题（12字内）", "desc": "具体可操作的赚钱机会说明，60字，包含数字和时间窗口" },
+    { "tag": "创业", "title": "机会标题", "desc": "说明约60字" },
+    { "tag": "投资", "title": "机会标题", "desc": "说明约60字" }
   ]
 }`;
-      
-      const rawText = await callAI(prompt);
-      const jsonStr = tryFixJSON(rawText);
-      const data = JSON.parse(jsonStr);
-      generatedData.cards = data.cards || [];
-      
     } else {
-      // 【分段式生成】晚报分两步
-      SP('🤖 AI 正在生成晚间版第1部分：锐评...');
-      const prompt1 = `你是"迪拜今日报"主编。今天${ds}，2026年。
+      prompt=`你是"迪拜今日报"主编。今天${dateFull}，迪拜傍晚。
 
-【实时新闻】
-${newsBlock}
+请立即调用 web_search 工具，分别搜索：
+1. "Dubai UAE news this afternoon today ${dubaiNow().getFullYear()}"
+2. "迪拜 新闻 下午 ${dubaiNow().getMonth()+1}月${dubaiNow().getDate()}日"
+3. "Dubai weather evening today"
+4. "${topic.en} Dubai guide ${dubaiNow().getFullYear()}"
+5. "Dubai gold price oil USD AED rate today"
 
-生成晚间版第1部分：深度锐评 + 行业拆解。
+注意：晚间新闻应优先选取下午最新发展，避免重复早上已被广泛报道的新闻，优先选择社会民生、商业动态方向。
 
-必须返回有效的 JSON：
+只返回纯 JSON（不加代码块、不加任何说明文字）：
 {
-  "cards": [
-    {
-      "title": "今日锐评",
-      "type": "insights",
-      "insights": "深度分析文本（150字以上）",
-      "industry": {
-        "name": "房产/商业/教育",
-        "analysis": "行业内幕分析"
-      }
-    }
-  ]
+  "date": "${dateStr}",
+  "dateEn": "${dateEn}",
+  "edition": "evening",
+  "weather": { "temp": "33", "condition": "晴", "humidity": "60", "uv": "低" },
+  "headlines": [
+    { "category": "迪拜", "title": "标题（16字内）", "body": "正文约80字，选下午最新进展", "source": "Khaleej Times" },
+    { "category": "全球", "title": "标题（16字内）", "body": "正文约80字", "source": "BBC" },
+    { "category": "商业", "title": "标题（16字内）", "body": "正文约80字", "source": "The National" }
+  ],
+  "howto": {
+    "question": "${topic.q}",
+    "steps": [
+      "第一步：具体操作（含机构名/网址/地点）",
+      "第二步：...",
+      "第三步：...",
+      "第四步：..."
+    ],
+    "insider_tip": "内部小贴士：华人容易踩的坑或者鲜为人知的捷径，约60字"
+  },
+  "market": { "gold": "345 AED/g", "usd_aed": "3.67", "oil": "82 USD/桶", "note": "数据来源与时间" }
 }`;
-      
-      const rawText1 = await callAI(prompt1);
-      const jsonStr1 = tryFixJSON(rawText1);
-      const data1 = JSON.parse(jsonStr1);
-      generatedData.cards = generatedData.cards.concat(data1.cards || []);
-      
-      SP('🤖 AI 正在生成晚间版第2部分：实操...');
-      const prompt2 = `你是"迪拜今日报"主编。今天${ds}，2026年。
-
-【实时新闻】
-${newsBlock}
-
-生成晚间版第2部分：保姆级实操指南（3个具体场景）。
-
-必须返回有效的 JSON：
-{
-  "cards": [
-    {
-      "title": "保姆级实操",
-      "type": "guides",
-      "content": [
-        {
-          "title": "场景1：开发商直租",
-          "steps": ["步骤1：...", "步骤2：..."]
-        }
-      ]
     }
-  ]
-}`;
-      
-      const rawText2 = await callAI(prompt2);
-      const jsonStr2 = tryFixJSON(rawText2);
-      const data2 = JSON.parse(jsonStr2);
-      generatedData.cards = generatedData.cards.concat(data2.cards || []);
-    }
-    
-    log('✅ 数据解析成功，开始渲染...');
-    renderCards(generatedData);
-    document.getElementById('saveBtn').style.display = 'inline-flex';
-    document.getElementById('tgBtn').style.display = 'inline-flex';
-    
-  } catch(e) {
-    log('❌ 生成失败: ' + e.message);
-    document.getElementById('err').textContent = '⚠️ ' + e.message;
-    document.getElementById('err').style.display = 'block';
-    empty.style.display = 'block';
-  } finally {
+
+    SP('🤖 AI 正在搜索整理，约30-40秒...');
+    const raw = await callAI(prompt);
+    log('原文前400字: '+raw.slice(0,400));
+
+    SP('🗞️ 正在排版...');
+    const d = parseAI(raw);
+    gData = d;
+
+    renderCards(d);
+    $('saveBtn').classList.add('show');
+    $('tgBtn').classList.add('show');
     SP('');
-    btn.disabled = false;
+
+  } catch(e){
+    showErr(e.message);
+    empty.style.display='block';
+    SP('');
+  } finally {
+    btn.disabled=false;
   }
 }
 
-function renderCards(data) {
-  const container = document.getElementById('cardContainer');
-  data.cards.forEach((card, idx) => {
-    const cardEl = document.createElement('div');
-    cardEl.className = 'card';
-    cardEl.id = 'card-' + idx;
-    
-    let contentHtml = '';
-    if(card.type === 'news' && card.content && Array.isArray(card.content)) {
-      contentHtml = `<div class="sec"><div class="slbl"><span class="scn">${card.title}</span><span class="sen">TOP HEADLINES</span><span class="sln"></span></div>`;
-      card.content.forEach(item => {
-        contentHtml += `<div class="ni"><div class="ne">${item.emoji||'📰'}</div><div class="nb"><div class="nt">${item.title}</div><div class="ns">${item.summary}</div></div></div>`;
-      });
-      contentHtml += `</div>`;
-    } else if(card.type === 'insights') {
-      contentHtml = `<div class="sec"><div class="slbl"><span class="scn">今日锐评</span><span class="sen">SHARP INSIGHTS</span><span class="sln"></span></div><div class="rw"><div class="rl">INSIGHT</div><div class="rt">${card.insights || card.text || ''}</div></div></div>`;
-      if(card.industry) {
-        contentHtml += `<div class="sec"><div class="slbl"><span class="scn">行业拆解</span><span class="sen">INDUSTRY</span><span class="sln"></span></div><div class="mi"><strong>${card.industry.name || ''}</strong>${card.industry.analysis || ''}</div></div>`;
-      }
-    } else if(card.type === 'guides' && card.content && Array.isArray(card.content)) {
-      contentHtml = `<div class="sec"><div class="slbl"><span class="scn">保姆级实操</span><span class="sen">GUIDES</span><span class="sln"></span></div>`;
-      card.content.forEach(g => {
-        const steps = Array.isArray(g.steps) ? g.steps.join('<br>') : g.steps || '';
-        contentHtml += `<div class="mi"><strong>${g.title}</strong>${steps}</div>`;
-      });
-      contentHtml += `</div>`;
-    } else {
-      contentHtml = `<div class="sec"><div class="mi">${card.text || JSON.stringify(card.content || {})}</div></div>`;
-    }
-    
-    cardEl.innerHTML = `
-      <div class="tbar"></div>
-      <div class="chdr">
-        <div class="hl"><div class="cn">迪拜今日报</div><div class="en">CARD ${idx+1} · ${data.mode.toUpperCase()}</div></div>
-        <div class="hr"><div class="dt">${data.date}</div><div class="yr">2026 · DUBAI</div></div>
+// ══════════════════════════════════════
+// 渲染
+// ══════════════════════════════════════
+function catCls(c){ return 'ni-cat cat-'+(c||'默认'); }
+
+function mkHeader(d, label){
+  return `<div class="topbar"></div>
+  <div class="c-head">
+    <div class="c-sub">Dubai · 迪拜 · دبي · UAE</div>
+    <div class="c-cn">迪拜今日报</div>
+    <div class="c-en">DUBAI DAILY DIGEST · AI REAL-TIME NEWS</div>
+    <div class="c-meta">
+      <span>${d.date||''}</span>
+      <span class="c-meta-m">${d.edition==='morning'?'🌅 早间版':'🌆 晚间版'} · ${label}</span>
+      <span>${(d.dateEn||'').split(',')[0]}</span>
+    </div>
+  </div>`;
+}
+
+function mkWeather(w){
+  if(!w) return '';
+  return `<div class="c-weather">
+    <span>☀️ ${w.temp||'—'}°C</span>
+    <span>${w.condition||''}</span>
+    <span>💧 ${w.humidity||'—'}%</span>
+    <span>UV ${w.uv||'—'}</span>
+  </div>`;
+}
+
+function mkFoot(d,n,t){
+  return `<div class="c-foot"><span>© 2026 DUBAI DAILY DIGEST</span><span>第 ${n}/${t} 版</span></div><div class="botbar"></div>`;
+}
+
+function mkNews(items){
+  return (items||[]).map((n,i)=>`
+    <div class="ni">
+      <div class="ni-num">${String(i+1).padStart(2,'0')}</div>
+      <div class="ni-body">
+        <span class="${catCls(n.category)}">${n.category||''}</span>
+        <div class="ni-title">${n.title||''}</div>
+        <div class="ni-body-t">${n.body||''}</div>
+        <div class="ni-src">— ${n.source||''}</div>
       </div>
-      <div class="sbar"><div class="sdot"></div><span>官方聚合 · 深度创作 · 迪拜华人必读</span></div>
-      ${contentHtml}
-      <div class="cft"><div class="ft">© 2026 DUBAI DAILY DIGEST</div><div class="ft">PAGE ${idx+1}/${data.cards.length}</div></div>
-      <div class="bbar"></div>
-    `;
-    container.appendChild(cardEl);
-  });
+    </div>`).join('');
 }
 
-async function saveAllImages() {
-  const btn = document.getElementById('saveBtn');
-  btn.disabled = true;
-  setShareStatus('正在生成高清图片...');
-  try {
-    const cards = document.querySelectorAll('.card');
-    for(let i = 0; i < cards.length; i++) {
-      const canvas = await html2canvas(cards[i], {backgroundColor: '#08080d', scale: 2, useCORS: true});
-      const link = document.createElement('a');
-      link.download = `迪拜今日报_${generatedData.date}_P${i+1}.png`;
-      link.href = canvas.toDataURL('image/png');
-      link.click();
+function renderCards(d){
+  const wrap=$('wrap'), isMorning=d.edition==='morning', total=2;
+  wrap.innerHTML='';
+
+  // ── 卡片1：报头 + 天气 + 3条新闻 ──
+  const c1=document.createElement('div');
+  c1.className='card'; c1.id='card-0';
+  c1.innerHTML=`
+    ${mkHeader(d, isMorning?'要闻版':'新闻版')}
+    ${mkWeather(d.weather)}
+    <div class="sec-lbl"><span class="sl-cn">${isMorning?'今日要闻':'晚间新闻'}</span><span class="sl-en">${isMorning?'MORNING HEADLINES':'EVENING NEWS'}</span><div class="sl-line"></div></div>
+    <div class="news-list">${mkNews(d.headlines)}</div>
+    ${mkFoot(d,1,total)}`;
+  wrap.appendChild(c1);
+
+  // ── 卡片2：早间=锐评+机会 / 晚间=实操+市场 ──
+  const c2=document.createElement('div');
+  c2.className='card'; c2.id='card-1';
+
+  let c2body='';
+  if(isMorning){
+    const opps=(d.opportunities||[]).map(o=>`
+      <div class="opp-item">
+        <div class="opp-tag">${o.tag||''}</div>
+        <div class="opp-body">
+          <div class="opp-title">${o.title||''}</div>
+          <div class="opp-desc">${o.desc||''}</div>
+        </div>
+      </div>`).join('');
+    c2body=`
+      <div class="sec-lbl"><span class="sl-cn">今日锐评</span><span class="sl-en">SHARP INSIGHT</span><div class="sl-line"></div></div>
+      <div class="c-insight"><div class="ins-tag">EDITOR'S VIEW</div><div class="ins-text">${d.insight||''}</div></div>
+      <div class="sec-lbl"><span class="sl-cn">赚钱机会</span><span class="sl-en">OPPORTUNITIES</span><div class="sl-line"></div></div>
+      <div class="opp-list">${opps}</div>`;
+  } else {
+    const hw=d.howto||{};
+    const steps=(hw.steps||[]).map((s,i)=>`
+      <div class="step-item">
+        <div class="step-num">${i+1}</div>
+        <div class="step-text">${s}</div>
+      </div>`).join('');
+    const mkt=d.market||{};
+    c2body=`
+      <div class="sec-lbl"><span class="sl-cn">每日实操一问</span><span class="sl-en">HOW-TO GUIDE</span><div class="sl-line"></div></div>
+      <div class="howto-q">${hw.question||''}</div>
+      <div class="howto-steps">${steps}</div>
+      ${hw.insider_tip?`<div class="howto-tip"><strong>💡 INSIDER TIP</strong>${hw.insider_tip}</div>`:''}
+      <div class="sec-lbl"><span class="sl-cn">今日行情</span><span class="sl-en">MARKET CLOSE</span><div class="sl-line"></div></div>
+      <div class="mkt-grid">
+        <div class="mkt-item"><div class="mkt-label">黄金</div><div class="mkt-val">${mkt.gold||'—'}</div><div class="mkt-sub">per gram</div></div>
+        <div class="mkt-item"><div class="mkt-label">USD/AED</div><div class="mkt-val">${mkt.usd_aed||'—'}</div><div class="mkt-sub">汇率</div></div>
+        <div class="mkt-item"><div class="mkt-label">原油</div><div class="mkt-val">${mkt.oil||'—'}</div><div class="mkt-sub">Brent</div></div>
+      </div>
+      ${mkt.note?`<div style="padding:0 18px 10px;font-size:9px;color:var(--ink3);font-style:italic">${mkt.note}</div>`:''}`;
+  }
+
+  c2.innerHTML=`
+    ${mkHeader(d, isMorning?'锐评·机会版':'实操·行情版')}
+    ${c2body}
+    ${mkFoot(d,2,total)}`;
+  wrap.appendChild(c2);
+}
+
+// ══════════════════════════════════════
+// 保存图片
+// ══════════════════════════════════════
+async function saveCards(){
+  const btn=$('saveBtn'); btn.disabled=true; setSt('正在生成高清图片...');
+  try{
+    const cards=document.querySelectorAll('.card');
+    if(!cards.length) throw new Error('请先生成报纸');
+    for(let i=0;i<cards.length;i++){
+      const canvas=await html2canvas(cards[i],{
+        backgroundColor:'#FAF7F0',scale:2.5,useCORS:true,logging:false,
+        width:cards[i].offsetWidth
+      });
+      const a=document.createElement('a');
+      a.download=`迪拜今日报_${gData?.date||'today'}_${gData?.edition==='morning'?'早间':'晚间'}_P${i+1}.png`;
+      a.href=canvas.toDataURL('image/png'); a.click();
+      await sleep(400);
     }
-    setShareStatus('✅ 所有图片已保存');
-  } catch(e) {
-    setShareStatus('❌ 保存失败：' + e.message, true);
-  } finally {
-    btn.disabled = false;
+    setSt('✅ 图片已保存到下载文件夹');
+  } catch(e){ setSt('❌ 保存失败: '+e.message,false); }
+  finally{ btn.disabled=false; }
+}
+
+// ══════════════════════════════════════
+// Telegram 发送
+// ══════════════════════════════════════
+async function sendTelegram(silent=false){
+  const token=lsGet('tt'),chatId=lsGet('tc');
+  if(!token||!chatId){ if(!silent) openSettings(); return; }
+  const btn=$('tgBtn'); btn.disabled=true;
+  if(!silent) setSt('正在发送到 Telegram...');
+
+  try{
+    const cards=document.querySelectorAll('.card');
+    if(!cards.length) throw new Error('没有卡片');
+    let ok=0;
+    for(let i=0;i<cards.length;i++){
+      const canvas=await html2canvas(cards[i],{backgroundColor:'#FAF7F0',scale:2.5,useCORS:true,logging:false});
+      const blob=await new Promise(r=>canvas.toBlob(r,'image/png'));
+      const form=new FormData();
+      form.append('chat_id',chatId);
+      form.append('photo',blob,`p${i+1}.png`);
+      if(i===0) form.append('caption',
+        `🏙️ 迪拜今日报 ${gData?.date||''} ${gData?.edition==='morning'?'🌅早间版':'🌆晚间版'}\n📍 #迪拜 #阿联酋 #迪拜华人`);
+      const r=await fetch(`https://api.telegram.org/bot${token}/sendPhoto`,{method:'POST',body:form});
+      const rj=await r.json();
+      if(!rj.ok) throw new Error('Telegram: '+rj.description);
+      ok++;
+      if(!silent) setSt(`✅ 已发送 ${ok}/${cards.length} 张...`);
+      await sleep(600);
+    }
+    if(!silent) setSt(`✅ 全部 ${ok} 张已发送`);
+  } catch(e){ if(!silent) setSt('❌ 发送失败: '+e.message,false); throw e; }
+  finally{ btn.disabled=false; }
+}
+
+// ══════════════════════════════════════
+// 定时自动推送
+// ══════════════════════════════════════
+function updateNextPush(){
+  if(!autoOn){ $('nextPush').textContent=''; return; }
+  const now=dubaiNow(), h=now.getHours(), m=now.getMinutes();
+  let next='';
+  if(h<7||(h===7&&m<5))      next=`⏰ 今日早间版将在 07:00 自动推送`;
+  else if(h<19||(h===19&&m<5))next=`⏰ 今晚间版将在 19:00 自动推送`;
+  else                         next=`⏰ 明日早间版将在 07:00 自动推送`;
+  $('nextPush').textContent=next;
+}
+
+async function checkSchedule(){
+  if(!autoOn||!lsGet('tt')||!lsGet('tc')) return;
+  const now=dubaiNow(), h=now.getHours(), m=now.getMinutes(), key=todayKey();
+
+  // 早间 07:00-07:04
+  if(h===7&&m<5&&lsGet('pushed_m')!==key){
+    log('⏰ 触发早间自动推送');
+    lsSet('pushed_m',key);
+    setMode('morning');
+    await generate();
+    if(!$('errBox').textContent) await sendTelegram(true).catch(e=>log('TG失败:'+e.message));
+  }
+  // 晚间 19:00-19:04
+  if(h===19&&m<5&&lsGet('pushed_e')!==key){
+    log('⏰ 触发晚间自动推送');
+    lsSet('pushed_e',key);
+    setMode('evening');
+    await generate();
+    if(!$('errBox').textContent) await sendTelegram(true).catch(e=>log('TG失败:'+e.message));
   }
 }
 
-async function sendAllToTelegram() {
-  const token = localStorage.getItem('tg_token');
-  const chatId = localStorage.getItem('tg_chatid');
-  if(!token || !chatId) { openSettings(); return; }
-  
-  const btn = document.getElementById('tgBtn');
-  btn.disabled = true;
-  setShareStatus('正在发送多图到 Telegram...');
-  
-  try {
-    const cards = document.querySelectorAll('.card');
-    for(let i = 0; i < cards.length; i++) {
-      const canvas = await html2canvas(cards[i], {backgroundColor: '#08080d', scale: 2, useCORS: true});
-      const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
-      const form = new FormData();
-      form.append('chat_id', chatId);
-      form.append('photo', blob, `p${i+1}.png`);
-      if(i === 0) form.append('caption', `🏙️ 迪拜今日报 ${generatedData.date} ${generatedData.mode==='morning'?'🌅早间版':'🌙晚间版'}\n#迪拜 #阿联酋`);
-      
-      await fetch(`https://api.telegram.org/bot${token}/sendPhoto`, {method: 'POST', body: form});
-    }
-    setShareStatus('✅ 已成功发送多图到 Telegram');
-  } catch(e) {
-    setShareStatus('❌ 发送失败：' + e.message, true);
-  } finally {
-    btn.disabled = false;
-  }
+function startScheduler(){
+  if(schedTimer) clearInterval(schedTimer);
+  updateNextPush();
+  schedTimer=setInterval(()=>{ checkSchedule(); updateNextPush(); }, 60000);
 }
+
+// ══════════════════════════════════════
+// 初始化
+// ══════════════════════════════════════
+startScheduler();
 </script>
 </body>
 </html>
+
