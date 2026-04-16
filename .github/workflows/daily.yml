@@ -1,0 +1,46 @@
+name: 迪拜今日报 Daily Generator
+
+on:
+  schedule:
+    - cron: '0 3 * * *'   # 迪拜时间 07:00 早间版
+    - cron: '0 15 * * *'  # 迪拜时间 19:00 晚间版
+  workflow_dispatch:
+    inputs:
+      edition:
+        description: 'morning / evening / both'
+        required: false
+        default: 'both'
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Determine edition
+        id: ed
+        run: |
+          INPUT="${{ github.event.inputs.edition }}"
+          HOUR=$(date -u +%H)
+          if [ -n "$INPUT" ] && [ "$INPUT" != "both" ]; then
+            echo "args=$INPUT" >> $GITHUB_OUTPUT
+          elif [ "$HOUR" -lt 12 ]; then
+            echo "args=morning" >> $GITHUB_OUTPUT
+          else
+            echo "args=evening" >> $GITHUB_OUTPUT
+          fi
+      - name: Generate
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: node generate.js ${{ steps.ed.outputs.args }}
+      - name: Commit
+        run: |
+          git config user.name "Dubai Daily Bot"
+          git config user.email "bot@dubai-daily"
+          git add data/
+          git diff --cached --quiet || git commit -m "📰 Auto $(date -u +'%Y-%m-%d %H:%M') [${{ steps.ed.outputs.args }}]"
+          git push
