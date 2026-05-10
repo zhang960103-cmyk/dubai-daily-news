@@ -113,6 +113,13 @@ body{background:var(--cream2);color:var(--ink);font-family:'Noto Serif SC',serif
 .ni-sm-body{font-size:11px;line-height:1.55;color:var(--ink2);width:100%;padding-left:0}
 .ni-sm-src{font-size:9px;color:var(--ink3);font-style:italic;margin-left:4px}
 
+/* 认知提升 */
+.cog-box{margin:4px 18px 14px;background:rgba(26,58,108,.05);border:1px solid rgba(26,58,108,.22);padding:13px 14px;border-radius:2px;position:relative}
+.cog-tag{position:absolute;top:-8px;left:12px;background:var(--paper);padding:0 8px;font-size:8px;font-weight:700;color:var(--blue);letter-spacing:3px}
+.cog-title{font-size:14px;font-weight:900;color:var(--ink);margin-bottom:6px;line-height:1.3}
+.cog-content{font-size:12px;line-height:1.85;color:var(--ink2);margin-bottom:6px}
+.cog-apply{font-size:11px;color:var(--blue);font-style:italic;border-top:1px solid rgba(26,58,108,.12);padding-top:6px;margin-top:4px}
+
 /* 今日风口 */
 .hot-list{padding:2px 18px 8px}
 .hot-item{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--cream3);align-items:center}
@@ -510,16 +517,85 @@ async function generate(){
 
     let prompt;
     if(isMorning){
-      prompt=`你是"迪拜今日报"主编。今天${dateFull}，迪拜早间。调用web_search搜索：1."Dubai UAE economy finance news today ${dubaiNow().getFullYear()}" 2."global stock market crypto gold oil price today" 3."Dubai business investment opportunity ${dubaiNow().getFullYear()}"
+      prompt=`你是"迪拜今日报"主编。今天${dateFull}，迪拜早间。
 
-【铁律】只输出纯JSON不加任何说明，所有字符串同一行不换行，不含英文双引号，不增减字段：
-{"date":"${dateStr}","dateEn":"${dateEn}","edition":"morning","weather":{"temp":"38","condition":"晴","humidity":"50","uv":"极强"},"headlines":[{"category":"迪拜","title":"12字内","body":"30字内一句话","source":"Gulf News"},{"category":"全球","title":"标题","body":"30字内","source":"Reuters"},{"category":"财经","title":"标题","body":"30字内","source":"Bloomberg"},{"category":"科技","title":"标题","body":"30字内","source":"TechCrunch"},{"category":"能源","title":"标题","body":"30字内","source":"Reuters"},{"category":"地产","title":"标题","body":"30字内","source":"Khaleej Times"},{"category":"贸易","title":"标题","body":"30字内","source":"SCMP"},{"category":"商业","title":"标题","body":"30字内","source":"The National"},{"category":"政策","title":"标题","body":"30字内","source":"WAM"},{"category":"市场","title":"标题","body":"30字内","source":"Bloomberg"}],"market":{"gold":"345","usd_aed":"3.67","oil":"82","btc":"68000","dji":"+0.8%","cn_a":"-0.3%"},"hotspots":[{"sector":"板块名称","desc":"看涨逻辑25字","signal":"↑↑"},{"sector":"板块名称","desc":"逻辑25字","signal":"↑"},{"sector":"板块名称","desc":"逻辑25字","signal":"→"}],"opportunities":[{"tag":"地产","title":"12字内标题","desc":"可操作说明45字"},{"tag":"贸易","title":"标题","desc":"45字"},{"tag":"创业","title":"标题","desc":"45字"},{"tag":"投资","title":"标题","desc":"45字"},{"tag":"副业","title":"标题","desc":"45字"}]}`;
+用web_search搜索：
+- "Dubai UAE economy finance news today ${dubaiNow().getFullYear()}"
+- "global stock gold oil bitcoin market today"
+- "Dubai investment opportunity ${dubaiNow().getFullYear()}"
+
+【输出规则】只输出JSON不加任何说明，字符串值单行不换行不含英文双引号，严格按以下结构不增减字段：
+
+{
+  "date":"${dateStr}","dateEn":"${dateEn}","edition":"morning",
+  "weather":{"temp":"实际温度数字","condition":"天气","humidity":"数字","uv":"强度"},
+  "headlines":[
+    {"category":"迪拜","title":"12字内标题","body":"30字内一句话","source":"媒体名"},
+    {"category":"全球","title":"标题","body":"30字内","source":"媒体名"},
+    {"category":"财经","title":"标题","body":"30字内","source":"媒体名"},
+    {"category":"科技","title":"标题","body":"30字内","source":"媒体名"},
+    {"category":"能源","title":"标题","body":"30字内","source":"媒体名"},
+    {"category":"地产","title":"标题","body":"30字内","source":"媒体名"},
+    {"category":"贸易","title":"标题","body":"30字内","source":"媒体名"},
+    {"category":"商业","title":"标题","body":"30字内","source":"媒体名"},
+    {"category":"政策","title":"标题","body":"30字内","source":"媒体名"},
+    {"category":"市场","title":"标题","body":"30字内","source":"媒体名"}
+  ],
+  "market":{"gold":"AED/g数字","usd_aed":"数字","oil":"USD桶数字","btc":"USD数字","dji":"涨跌%","cn_a":"涨跌%"},
+  "hotspots":[
+    {"sector":"板块名","desc":"25字看涨逻辑","signal":"↑↑"},
+    {"sector":"板块名","desc":"25字逻辑","signal":"↑"},
+    {"sector":"板块名","desc":"25字逻辑","signal":"→"}
+  ],
+  "opportunities":[
+    {"tag":"地产","title":"12字内","desc":"45字可操作说明"},
+    {"tag":"贸易","title":"12字内","desc":"45字"},
+    {"tag":"创业","title":"12字内","desc":"45字"},
+    {"tag":"投资","title":"12字内","desc":"45字"},
+    {"tag":"副业","title":"12字内","desc":"45字"}
+  ],
+  "cognition":{"title":"概念书名框架10字内","content":"核心洞见40字","apply":"迪拜华人应用场景20字"}
+}`;
     } else {
-      prompt=`你是"迪拜今日报"主编。今天${dateFull}，迪拜傍晚。调用web_search搜索：1."Dubai UAE economy finance news today ${dubaiNow().getFullYear()}" 2."gold oil bitcoin stock market close today" 3."${topic.en} Dubai ${dubaiNow().getFullYear()}"
+      prompt=`你是"迪拜今日报"主编。今天${dateFull}，迪拜傍晚。
 
-【铁律】只输出纯JSON不加任何说明，所有字符串同一行不换行，不含英文双引号，不增减字段：
-{"date":"${dateStr}","dateEn":"${dateEn}","edition":"evening","weather":{"temp":"33","condition":"晴","humidity":"60","uv":"低"},"headlines":[{"category":"迪拜","title":"12字内","body":"30字内一句话","source":"Khaleej Times"},{"category":"全球","title":"标题","body":"30字内","source":"BBC"},{"category":"财经","title":"标题","body":"30字内","source":"Bloomberg"},{"category":"科技","title":"标题","body":"30字内","source":"The Verge"},{"category":"能源","title":"标题","body":"30字内","source":"Reuters"},{"category":"地产","title":"标题","body":"30字内","source":"The National"},{"category":"贸易","title":"标题","body":"30字内","source":"FT"},{"category":"商业","title":"标题","body":"30字内","source":"WSJ"},{"category":"政策","title":"标题","body":"30字内","source":"WAM"},{"category":"市场","title":"标题","body":"30字内","source":"Bloomberg"}],"market":{"gold":"345","usd_aed":"3.67","oil":"82","btc":"68000","dji":"+0.8%","cn_a":"-0.3%"},"hotspots":[{"sector":"板块名称","desc":"逻辑25字","signal":"↑↑"},{"sector":"板块名称","desc":"逻辑25字","signal":"↑"},{"sector":"板块名称","desc":"逻辑25字","signal":"→"}],"opportunities":[{"tag":"地产","title":"12字内标题","desc":"可操作说明45字"},{"tag":"贸易","title":"标题","desc":"45字"},{"tag":"创业","title":"标题","desc":"45字"},{"tag":"投资","title":"标题","desc":"45字"},{"tag":"副业","title":"标题","desc":"45字"}],"tip":{"question":"${topic.q}","steps":["第一步30字内","第二步30字内","第三步30字内","第四步30字内"],"insider_tip":"华人常踩的坑或捷径40字内"}}`;
-    }
+用web_search搜索：
+- "Dubai UAE economy finance news today ${dubaiNow().getFullYear()}"
+- "gold oil bitcoin stock market close today"
+- "${topic.en} Dubai ${dubaiNow().getFullYear()}"
+
+【输出规则】只输出JSON不加任何说明，字符串值单行不换行不含英文双引号，严格按以下结构不增减字段：
+
+{
+  "date":"${dateStr}","dateEn":"${dateEn}","edition":"evening",
+  "weather":{"temp":"实际温度数字","condition":"天气","humidity":"数字","uv":"强度"},
+  "headlines":[
+    {"category":"迪拜","title":"12字内标题","body":"30字内一句话","source":"媒体名"},
+    {"category":"全球","title":"标题","body":"30字内","source":"媒体名"},
+    {"category":"财经","title":"标题","body":"30字内","source":"媒体名"},
+    {"category":"科技","title":"标题","body":"30字内","source":"媒体名"},
+    {"category":"能源","title":"标题","body":"30字内","source":"媒体名"},
+    {"category":"地产","title":"标题","body":"30字内","source":"媒体名"},
+    {"category":"贸易","title":"标题","body":"30字内","source":"媒体名"},
+    {"category":"商业","title":"标题","body":"30字内","source":"媒体名"},
+    {"category":"政策","title":"标题","body":"30字内","source":"媒体名"},
+    {"category":"市场","title":"标题","body":"30字内","source":"媒体名"}
+  ],
+  "market":{"gold":"AED/g数字","usd_aed":"数字","oil":"USD桶数字","btc":"USD数字","dji":"涨跌%","cn_a":"涨跌%"},
+  "hotspots":[
+    {"sector":"板块名","desc":"25字逻辑","signal":"↑↑"},
+    {"sector":"板块名","desc":"25字逻辑","signal":"↑"},
+    {"sector":"板块名","desc":"25字逻辑","signal":"→"}
+  ],
+  "opportunities":[
+    {"tag":"地产","title":"12字内","desc":"45字可操作说明"},
+    {"tag":"贸易","title":"12字内","desc":"45字"},
+    {"tag":"创业","title":"12字内","desc":"45字"},
+    {"tag":"投资","title":"12字内","desc":"45字"},
+    {"tag":"副业","title":"12字内","desc":"45字"}
+  ],
+  "tip":{"question":"${topic.q}","steps":["第一步30字内","第二步","第三步","第四步"],"insider_tip":"华人捷径或避坑40字"}
+}`;
 
     SP('🤖 AI 正在搜索整理，约30-40秒...');
     const raw = await callAI(prompt);
@@ -634,6 +710,14 @@ function renderCards(d){
     <div class="hot-list">${hots}</div>
     <div class="sec-lbl"><span class="sl-cn">赚钱机会</span><span class="sl-en">MONEY OPPORTUNITIES</span><div class="sl-line"></div></div>
     <div class="opp-list">${opps}</div>
+    ${isMorning&&d.cognition?`
+    <div class="sec-lbl"><span class="sl-cn">认知提升</span><span class="sl-en">MINDSET UPGRADE</span><div class="sl-line"></div></div>
+    <div class="cog-box">
+      <div class="cog-tag">TODAY'S INSIGHT</div>
+      <div class="cog-title">${d.cognition.title||''}</div>
+      <div class="cog-content">${d.cognition.content||''}</div>
+      <div class="cog-apply">💡 ${d.cognition.apply||''}</div>
+    </div>`:''}
     ${mkFoot(d,2,total)}`;
   wrap.appendChild(c2);
 
