@@ -96,6 +96,36 @@ body{background:var(--cream2);color:var(--ink);font-family:'Noto Serif SC',serif
 .ni-body-t{font-size:12px;line-height:1.85;color:var(--ink2)}
 .ni-src{font-size:9px;color:var(--ink3);margin-top:4px;font-style:italic}
 
+/* 更多分类色 */
+.cat-财经{background:#1A5C30}
+.cat-能源{background:#7C4A10}
+.cat-地产{background:#1A3A6C}
+.cat-贸易{background:#4A1A7C}
+.cat-政策{background:#6C1A1A}
+.cat-市场{background:#1A4A5C}
+.cat-加密{background:#2A1A6C}
+.cat-外汇{background:#3A5C10}
+
+/* 紧凑新闻（10条） */
+.ni-sm{display:flex;gap:8px;padding:6px 0;border-bottom:1px solid var(--cream3);align-items:baseline;flex-wrap:wrap}
+.ni-sm:last-child{border-bottom:none}
+.ni-sm-title{font-size:13px;font-weight:700;color:var(--ink);line-height:1.35;margin:0 6px 2px 6px}
+.ni-sm-body{font-size:11px;line-height:1.55;color:var(--ink2);width:100%;padding-left:0}
+.ni-sm-src{font-size:9px;color:var(--ink3);font-style:italic;margin-left:4px}
+
+/* 今日风口 */
+.hot-list{padding:2px 18px 8px}
+.hot-item{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--cream3);align-items:center}
+.hot-item:last-child{border-bottom:none}
+.hot-sector{font-size:12px;font-weight:900;color:var(--ink);flex-shrink:0;width:68px}
+.hot-desc{flex:1;font-size:11px;line-height:1.55;color:var(--ink2)}
+.hot-signal{font-size:15px;font-weight:900;flex-shrink:0;width:28px;text-align:right;color:var(--green)}
+.hot-signal.down{color:var(--red)}
+.hot-signal.flat{color:var(--ink3)}
+
+/* 行情6格 */
+.mkt-grid-6{padding:4px 18px 8px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+
 /* 锐评框 */
 .c-insight{margin:4px 18px 14px;background:rgba(154,123,47,.07);border:1px solid rgba(196,162,74,.35);padding:14px 15px;border-radius:2px;position:relative}
 .ins-tag{position:absolute;top:-8px;left:12px;background:var(--paper);padding:0 8px;font-size:8px;font-weight:700;color:var(--gold);letter-spacing:3px}
@@ -480,75 +510,15 @@ async function generate(){
 
     let prompt;
     if(isMorning){
-      prompt=`你是"迪拜今日报"主编。今天${dateFull}，迪拜早间。
+      prompt=`你是"迪拜今日报"主编。今天${dateFull}，迪拜早间。调用web_search搜索：1."Dubai UAE economy finance news today ${dubaiNow().getFullYear()}" 2."global stock market crypto gold oil price today" 3."Dubai business investment opportunity ${dubaiNow().getFullYear()}"
 
-请调用 web_search 工具搜索以下内容：
-1. "Dubai UAE news today ${dubaiNow().getFullYear()}"
-2. "Dubai weather today"
-3. "Dubai business opportunity ${dubaiNow().getFullYear()}"
-
-基于搜索到的真实内容生成早间报纸，内容面向迪拜华人，语言简练实用。
-新闻来源：Gulf News / Khaleej Times / The National / WAM / Reuters / Bloomberg 等。
-
-【JSON格式铁律】
-- 只输出纯JSON，不加代码块，不加任何说明文字
-- 所有字符串值必须在同一行，绝对不能换行
-- 字符串内不能出现英文双引号（"）
-- 每个字段值简短精炼，body最多80字，desc最多60字
-- 严格按照下方结构，不能增减字段
-
-{
-  "date": "${dateStr}",
-  "dateEn": "${dateEn}",
-  "edition": "morning",
-  "weather": { "temp": "38", "condition": "晴间多云", "humidity": "55", "uv": "极强" },
-  "headlines": [
-    { "category": "全球", "title": "标题16字内", "body": "正文约80字含具体数字", "source": "Reuters" },
-    { "category": "迪拜", "title": "标题16字内", "body": "正文约80字", "source": "Gulf News" },
-    { "category": "经济", "title": "标题16字内", "body": "正文约80字", "source": "Bloomberg" }
-  ],
-  "insight": "今日锐评约120字，有具体判断和数据支撑",
-  "opportunities": [
-    { "tag": "房产", "title": "机会标题12字内", "desc": "可操作说明约60字含数字" },
-    { "tag": "创业", "title": "机会标题12字内", "desc": "说明约60字" },
-    { "tag": "投资", "title": "机会标题12字内", "desc": "说明约60字" }
-  ]
-}`;
+【铁律】只输出纯JSON不加任何说明，所有字符串同一行不换行，不含英文双引号，不增减字段：
+{"date":"${dateStr}","dateEn":"${dateEn}","edition":"morning","weather":{"temp":"38","condition":"晴","humidity":"50","uv":"极强"},"headlines":[{"category":"迪拜","title":"12字内","body":"30字内一句话","source":"Gulf News"},{"category":"全球","title":"标题","body":"30字内","source":"Reuters"},{"category":"财经","title":"标题","body":"30字内","source":"Bloomberg"},{"category":"科技","title":"标题","body":"30字内","source":"TechCrunch"},{"category":"能源","title":"标题","body":"30字内","source":"Reuters"},{"category":"地产","title":"标题","body":"30字内","source":"Khaleej Times"},{"category":"贸易","title":"标题","body":"30字内","source":"SCMP"},{"category":"商业","title":"标题","body":"30字内","source":"The National"},{"category":"政策","title":"标题","body":"30字内","source":"WAM"},{"category":"市场","title":"标题","body":"30字内","source":"Bloomberg"}],"market":{"gold":"345","usd_aed":"3.67","oil":"82","btc":"68000","dji":"+0.8%","cn_a":"-0.3%"},"hotspots":[{"sector":"板块名称","desc":"看涨逻辑25字","signal":"↑↑"},{"sector":"板块名称","desc":"逻辑25字","signal":"↑"},{"sector":"板块名称","desc":"逻辑25字","signal":"→"}],"opportunities":[{"tag":"地产","title":"12字内标题","desc":"可操作说明45字"},{"tag":"贸易","title":"标题","desc":"45字"},{"tag":"创业","title":"标题","desc":"45字"},{"tag":"投资","title":"标题","desc":"45字"},{"tag":"副业","title":"标题","desc":"45字"}]}`;
     } else {
-      prompt=`你是"迪拜今日报"主编。今天${dateFull}，迪拜傍晚。
+      prompt=`你是"迪拜今日报"主编。今天${dateFull}，迪拜傍晚。调用web_search搜索：1."Dubai UAE economy finance news today ${dubaiNow().getFullYear()}" 2."gold oil bitcoin stock market close today" 3."${topic.en} Dubai ${dubaiNow().getFullYear()}"
 
-请调用 web_search 工具搜索以下内容：
-1. "Dubai UAE news today ${dubaiNow().getFullYear()}"
-2. "Dubai weather evening today"
-3. "${topic.en} Dubai ${dubaiNow().getFullYear()}"
-4. "Dubai gold price oil USD AED rate today"
-
-晚间新闻优先选取社会民生、商业动态方向，避免重复早间已报道内容。
-
-【JSON格式铁律】
-- 只输出纯JSON，不加代码块，不加任何说明文字
-- 所有字符串值必须在同一行，绝对不能换行
-- 字符串内不能出现英文双引号（"）
-- 每个字段值简短精炼，body最多80字，steps每条最多40字
-- 严格按照下方结构，不能增减字段
-
-{
-  "date": "${dateStr}",
-  "dateEn": "${dateEn}",
-  "edition": "evening",
-  "weather": { "temp": "33", "condition": "晴", "humidity": "60", "uv": "低" },
-  "headlines": [
-    { "category": "迪拜", "title": "标题16字内", "body": "正文约80字选下午最新进展", "source": "Khaleej Times" },
-    { "category": "全球", "title": "标题16字内", "body": "正文约80字", "source": "BBC" },
-    { "category": "商业", "title": "标题16字内", "body": "正文约80字", "source": "The National" }
-  ],
-  "howto": {
-    "question": "${topic.q}",
-    "steps": ["第一步：具体操作含机构名或地点", "第二步：具体操作", "第三步：具体操作", "第四步：具体操作"],
-    "insider_tip": "华人常踩的坑或鲜为人知的捷径约50字"
-  },
-  "market": { "gold": "345 AED/g", "usd_aed": "3.67", "oil": "82 USD/桶" }
-}`;
+【铁律】只输出纯JSON不加任何说明，所有字符串同一行不换行，不含英文双引号，不增减字段：
+{"date":"${dateStr}","dateEn":"${dateEn}","edition":"evening","weather":{"temp":"33","condition":"晴","humidity":"60","uv":"低"},"headlines":[{"category":"迪拜","title":"12字内","body":"30字内一句话","source":"Khaleej Times"},{"category":"全球","title":"标题","body":"30字内","source":"BBC"},{"category":"财经","title":"标题","body":"30字内","source":"Bloomberg"},{"category":"科技","title":"标题","body":"30字内","source":"The Verge"},{"category":"能源","title":"标题","body":"30字内","source":"Reuters"},{"category":"地产","title":"标题","body":"30字内","source":"The National"},{"category":"贸易","title":"标题","body":"30字内","source":"FT"},{"category":"商业","title":"标题","body":"30字内","source":"WSJ"},{"category":"政策","title":"标题","body":"30字内","source":"WAM"},{"category":"市场","title":"标题","body":"30字内","source":"Bloomberg"}],"market":{"gold":"345","usd_aed":"3.67","oil":"82","btc":"68000","dji":"+0.8%","cn_a":"-0.3%"},"hotspots":[{"sector":"板块名称","desc":"逻辑25字","signal":"↑↑"},{"sector":"板块名称","desc":"逻辑25字","signal":"↑"},{"sector":"板块名称","desc":"逻辑25字","signal":"→"}],"opportunities":[{"tag":"地产","title":"12字内标题","desc":"可操作说明45字"},{"tag":"贸易","title":"标题","desc":"45字"},{"tag":"创业","title":"标题","desc":"45字"},{"tag":"投资","title":"标题","desc":"45字"},{"tag":"副业","title":"标题","desc":"45字"}],"tip":{"question":"${topic.q}","steps":["第一步30字内","第二步30字内","第三步30字内","第四步30字内"],"insider_tip":"华人常踩的坑或捷径40字内"}}`;
     }
 
     SP('🤖 AI 正在搜索整理，约30-40秒...');
@@ -606,80 +576,86 @@ function mkFoot(d,n,t){
   return `<div class="c-foot"><span>© 2026 DUBAI DAILY DIGEST</span><span>第 ${n}/${t} 版</span></div><div class="botbar"></div>`;
 }
 
-function mkNews(items){
-  return (items||[]).map((n,i)=>`
-    <div class="ni">
-      <div class="ni-num">${String(i+1).padStart(2,'0')}</div>
-      <div class="ni-body">
-        <span class="${catCls(n.category)}">${n.category||''}</span>
-        <div class="ni-title">${n.title||''}</div>
-        <div class="ni-body-t">${n.body||''}</div>
-        <div class="ni-src">— ${n.source||''}</div>
-      </div>
+function mkNewsCompact(items){
+  return (items||[]).map(n=>`
+    <div class="ni-sm">
+      <span class="${catCls(n.category)}">${n.category||''}</span><span class="ni-sm-title">${n.title||''}</span>
+      <div class="ni-sm-body">${n.body||''}<span class="ni-sm-src"> —${n.source||''}</span></div>
     </div>`).join('');
 }
 
 function renderCards(d){
-  const wrap=$('wrap'), isMorning=d.edition==='morning', total=2;
+  const wrap=$('wrap'), isMorning=d.edition==='morning';
+  const total=isMorning?2:3;
   wrap.innerHTML='';
 
-  // ── 卡片1：报头 + 天气 + 3条新闻 ──
+  // ── 卡片1：报头 + 天气 + 10条简洁新闻 ──
   const c1=document.createElement('div');
   c1.className='card'; c1.id='card-0';
   c1.innerHTML=`
-    ${mkHeader(d, isMorning?'要闻版':'新闻版')}
+    ${mkHeader(d, isMorning?'要闻·财经版':'晚间·财经版')}
     ${mkWeather(d.weather)}
-    <div class="sec-lbl"><span class="sl-cn">${isMorning?'今日要闻':'晚间新闻'}</span><span class="sl-en">${isMorning?'MORNING HEADLINES':'EVENING NEWS'}</span><div class="sl-line"></div></div>
-    <div class="news-list">${mkNews(d.headlines)}</div>
+    <div class="sec-lbl"><span class="sl-cn">${isMorning?'今日要闻':'晚间要闻'}</span><span class="sl-en">10 HEADLINES · MULTI-CATEGORY</span><div class="sl-line"></div></div>
+    <div class="news-list">${mkNewsCompact(d.headlines)}</div>
     ${mkFoot(d,1,total)}`;
   wrap.appendChild(c1);
 
-  // ── 卡片2：早间=锐评+机会 / 晚间=实操+市场 ──
+  // ── 卡片2：行情 + 风口 + 赚钱机会 ──
   const c2=document.createElement('div');
   c2.className='card'; c2.id='card-1';
+  const mkt=d.market||{};
+  const sigClass=s=>(s||'').includes('↓')?'down':(s||'').includes('→')?'flat':'';
+  const hots=(d.hotspots||[]).map(h=>`
+    <div class="hot-item">
+      <div class="hot-sector">${h.sector||''}</div>
+      <div class="hot-desc">${h.desc||''}</div>
+      <div class="hot-signal ${sigClass(h.signal)}">${h.signal||''}</div>
+    </div>`).join('');
+  const opps=(d.opportunities||[]).map(o=>`
+    <div class="opp-item">
+      <div class="opp-tag">${o.tag||''}</div>
+      <div class="opp-body">
+        <div class="opp-title">${o.title||''}</div>
+        <div class="opp-desc">${o.desc||''}</div>
+      </div>
+    </div>`).join('');
+  c2.innerHTML=`
+    ${mkHeader(d,'财经·机会版')}
+    <div class="sec-lbl"><span class="sl-cn">今日行情</span><span class="sl-en">MARKET SNAPSHOT</span><div class="sl-line"></div></div>
+    <div class="mkt-grid-6">
+      <div class="mkt-item"><div class="mkt-label">黄金</div><div class="mkt-val">${mkt.gold||'—'}</div><div class="mkt-sub">AED/g</div></div>
+      <div class="mkt-item"><div class="mkt-label">USD/AED</div><div class="mkt-val">${mkt.usd_aed||'—'}</div><div class="mkt-sub">汇率</div></div>
+      <div class="mkt-item"><div class="mkt-label">原油</div><div class="mkt-val">${mkt.oil||'—'}</div><div class="mkt-sub">USD/桶</div></div>
+      <div class="mkt-item"><div class="mkt-label">比特币</div><div class="mkt-val">${mkt.btc||'—'}</div><div class="mkt-sub">USD</div></div>
+      <div class="mkt-item"><div class="mkt-label">道指</div><div class="mkt-val">${mkt.dji||'—'}</div><div class="mkt-sub">涨跌</div></div>
+      <div class="mkt-item"><div class="mkt-label">A股</div><div class="mkt-val">${mkt.cn_a||'—'}</div><div class="mkt-sub">涨跌</div></div>
+    </div>
+    <div class="sec-lbl"><span class="sl-cn">今日风口</span><span class="sl-en">HOT SECTORS</span><div class="sl-line"></div></div>
+    <div class="hot-list">${hots}</div>
+    <div class="sec-lbl"><span class="sl-cn">赚钱机会</span><span class="sl-en">MONEY OPPORTUNITIES</span><div class="sl-line"></div></div>
+    <div class="opp-list">${opps}</div>
+    ${mkFoot(d,2,total)}`;
+  wrap.appendChild(c2);
 
-  let c2body='';
-  if(isMorning){
-    const opps=(d.opportunities||[]).map(o=>`
-      <div class="opp-item">
-        <div class="opp-tag">${o.tag||''}</div>
-        <div class="opp-body">
-          <div class="opp-title">${o.title||''}</div>
-          <div class="opp-desc">${o.desc||''}</div>
-        </div>
-      </div>`).join('');
-    c2body=`
-      <div class="sec-lbl"><span class="sl-cn">今日锐评</span><span class="sl-en">SHARP INSIGHT</span><div class="sl-line"></div></div>
-      <div class="c-insight"><div class="ins-tag">EDITOR'S VIEW</div><div class="ins-text">${d.insight||''}</div></div>
-      <div class="sec-lbl"><span class="sl-cn">赚钱机会</span><span class="sl-en">OPPORTUNITIES</span><div class="sl-line"></div></div>
-      <div class="opp-list">${opps}</div>`;
-  } else {
-    const hw=d.howto||{};
-    const steps=(hw.steps||[]).map((s,i)=>`
+  // ── 卡片3（仅晚报）：今日实操 ──
+  if(!isMorning){
+    const c3=document.createElement('div');
+    c3.className='card'; c3.id='card-2';
+    const tip=d.tip||{};
+    const steps=(tip.steps||[]).map((s,i)=>`
       <div class="step-item">
         <div class="step-num">${i+1}</div>
         <div class="step-text">${s}</div>
       </div>`).join('');
-    const mkt=d.market||{};
-    c2body=`
+    c3.innerHTML=`
+      ${mkHeader(d,'今日实操版')}
       <div class="sec-lbl"><span class="sl-cn">每日实操一问</span><span class="sl-en">HOW-TO GUIDE</span><div class="sl-line"></div></div>
-      <div class="howto-q">${hw.question||''}</div>
+      <div class="howto-q">${tip.question||''}</div>
       <div class="howto-steps">${steps}</div>
-      ${hw.insider_tip?`<div class="howto-tip"><strong>💡 INSIDER TIP</strong>${hw.insider_tip}</div>`:''}
-      <div class="sec-lbl"><span class="sl-cn">今日行情</span><span class="sl-en">MARKET CLOSE</span><div class="sl-line"></div></div>
-      <div class="mkt-grid">
-        <div class="mkt-item"><div class="mkt-label">黄金</div><div class="mkt-val">${mkt.gold||'—'}</div><div class="mkt-sub">per gram</div></div>
-        <div class="mkt-item"><div class="mkt-label">USD/AED</div><div class="mkt-val">${mkt.usd_aed||'—'}</div><div class="mkt-sub">汇率</div></div>
-        <div class="mkt-item"><div class="mkt-label">原油</div><div class="mkt-val">${mkt.oil||'—'}</div><div class="mkt-sub">Brent</div></div>
-      </div>
-      `;
+      ${tip.insider_tip?`<div class="howto-tip"><strong>💡 INSIDER TIP</strong>${tip.insider_tip}</div>`:''}
+      ${mkFoot(d,3,total)}`;
+    wrap.appendChild(c3);
   }
-
-  c2.innerHTML=`
-    ${mkHeader(d, isMorning?'锐评·机会版':'实操·行情版')}
-    ${c2body}
-    ${mkFoot(d,2,total)}`;
-  wrap.appendChild(c2);
 }
 
 // ══════════════════════════════════════
