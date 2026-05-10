@@ -331,55 +331,101 @@ function parseAI(text){
 }
 
 // ══════════════════════════════════════
-// AI 调用（含 web_search，3次重试）
+// AI 调用（多轮 web_search 循环，3次重试）
 // ══════════════════════════════════════
 async function callAI(prompt, attempt=1){
   const key=lsGet('ak');
   if(!key) throw new Error('未配置 API Key，请点击「⚙️ 设置」填写');
 
-  let res, json;
-  try{
-    res = await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{
-        'Content-Type':'application/json',
-        'x-api-key':key,
-        'anthropic-version':'2023-06-01',
-        'anthropic-dangerous-direct-browser-access':'true'
-      },
-      body:JSON.stringify({
-        model:'claude-sonnet-4-6',
-        max_tokens:3000,
-        tools:[{type:'web_search_20250305',name:'web_search'}],
-        messages:[{role:'user',content:prompt}]
-      })
-    });
-    json=await res.json();
-  } catch(e){
-    if(attempt<3){ log(`网络错误，第${attempt}次重试...`); await sleep(2000*attempt); return callAI(prompt,attempt+1); }
-    throw new Error('网络请求失败：'+e.message);
+  // 单次 HTTP 请求
+  const doFetch = async(messages) => {
+    let res;
+    try{
+      res = await fetch('https://api.anthropic.com/v1/messages',{
+        method:'POST',
+        headers:{
+          'Content-Type':'application/json',
+          'x-api-key':key,
+          'anthropic-version':'2023-06-01',
+          'anthropic-dangerous-direct-browser-access':'true'
+        },
+        body:JSON.stringify({
+          model:'claude-sonnet-4-6',
+          max_tokens:3000,
+          tools:[{type:'web_search_20250305',name:'web_search'}],
+          messages
+        })
+      });
+    } catch(e){ throw new Error('网络请求失败：'+e.message); }
+
+    const json=await res.json();
+    if(json.error){
+      const t=json.error.type||'',m=json.error.message||'';
+      if(t==='authentication_error') throw new Error('API Key 无效或已过期，请在设置中更新');
+      if(t==='rate_limit_error')     throw new Error('rate_limit');
+      if(t==='overloaded_error')     throw new Error('overloaded');
+      throw new Error('API错误: '+(m||JSON.stringify(json.error)));
+    }
+    return json;
+  };
+
+  // 多轮对话循环（web_search 需要来回多次）
+  const messages=[{role:'user',content:prompt}];
+
+  for(let turn=0; turn<8; turn++){
+    let json;
+    try{
+      json = await doFetch(messages);
+    } catch(e){
+      if(e.message==='rate_limit'){
+        if(attempt<3){ await sleep(5000); return callAI(prompt,attempt+1); }
+        throw new Error('请求频率过高，请1分钟后重试');
+      }
+      if(e.message==='overloaded'){
+        if(attempt<3){ await sleep(3000); return callAI(prompt,attempt+1); }
+        throw new Error('Anthropic 服务繁忙，请稍后重试');
+      }
+      if(attempt<3 && !e.message.includes('无效') && !e.message.includes('API错误')){
+        await sleep(2000*attempt); return callAI(prompt,attempt+1);
+      }
+      throw e;
+    }
+
+    const blocks = json.content||[];
+    log(`Turn ${turn+1}: [${blocks.map(b=>b.type).join(', ')}] stop=${json.stop_reason}`);
+
+    // ── 完成：提取最终文字 ──
+    if(json.stop_reason==='end_turn'){
+      const text=blocks.filter(b=>b.type==='text').map(b=>b.text||'').join('');
+      if(!text.trim()) throw new Error('AI 未返回文字内容（end_turn 但无 text 块）');
+      log('✅ 文字长度: '+text.length);
+      return text;
+    }
+
+    // ── 工具调用：构造 tool_result 继续对话 ──
+    if(json.stop_reason==='tool_use'){
+      messages.push({role:'assistant', content:blocks});
+
+      const toolUses=blocks.filter(b=>b.type==='tool_use');
+      const toolResults=toolUses.map(b=>({
+        type:'tool_result',
+        tool_use_id:b.id,
+        content:''   // web_search 由 API 服务端执行，content 留空即可
+      }));
+
+      messages.push({role:'user', content:toolResults});
+      SP(`🔍 正在网络搜索（第 ${turn+1} 轮）…`);
+      await sleep(300);
+      continue;
+    }
+
+    // ── 兜底：有文字就返回 ──
+    const text=blocks.filter(b=>b.type==='text').map(b=>b.text||'').join('');
+    if(text.trim()){ log('⚠️ 非标准stop但有文字: '+json.stop_reason); return text; }
+    throw new Error('意外的 stop_reason: '+json.stop_reason);
   }
 
-  if(json.error){
-    const t=json.error.type||'',m=json.error.message||'';
-    if(t==='authentication_error') throw new Error('API Key 无效或已过期，请在设置中更新');
-    if(t==='rate_limit_error'){
-      if(attempt<3){ await sleep(5000); return callAI(prompt,attempt+1); }
-      throw new Error('请求频率过高，请1分钟后重试');
-    }
-    if(t==='overloaded_error'){
-      if(attempt<3){ await sleep(3000); return callAI(prompt,attempt+1); }
-      throw new Error('Anthropic 服务繁忙，请稍后重试');
-    }
-    throw new Error('API错误: '+(m||JSON.stringify(json.error)));
-  }
-
-  const blocks=json.content||[];
-  log(`API: ${blocks.map(b=>b.type).join('+')} | stop=${json.stop_reason}`);
-  const text=blocks.filter(b=>b.type==='text').map(b=>b.text||'').join('');
-  if(!text.trim()) throw new Error('AI 未返回文字内容（stop_reason:'+json.stop_reason+'）');
-  log('文字长度: '+text.length);
-  return text;
+  throw new Error('搜索轮数超限（>8轮），请重试');
 }
 
 function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
