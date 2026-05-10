@@ -318,16 +318,42 @@ function saveSettings(){
 // ══════════════════════════════════════
 function parseAI(text){
   text=text.replace(/```json\s*/gi,'').replace(/```\s*/g,'').trim();
+
+  // 找 JSON 边界
   let depth=0,start=-1,end=-1;
   for(let i=0;i<text.length;i++){
     if(text[i]==='{'){if(start===-1)start=i;depth++;}
     else if(text[i]==='}'){depth--;if(depth===0&&start!==-1){end=i;break;}}
   }
-  if(start===-1||end===-1) throw new Error('响应中未找到 JSON。原文片段：'+text.slice(0,300));
+  if(start===-1||end===-1) throw new Error('响应中未找到 JSON。原文：'+text.slice(0,300));
   let s=text.substring(start,end+1);
-  s=s.replace(/,\s*([}\]])/g,'$1'); // 修复尾逗号
+
+  // 第1步：修复尾逗号
+  s=s.replace(/,\s*([}\]])/g,'$1');
+
+  // 第2步：状态机逐字符扫描，清除字符串值内的真实换行/制表符
+  let cleaned='', inStr=false, esc=false;
+  for(let i=0;i<s.length;i++){
+    const c=s[i];
+    if(esc){cleaned+=c;esc=false;continue;}
+    if(c==='\\'){cleaned+=c;esc=true;continue;}
+    if(c==='"'){inStr=!inStr;cleaned+=c;continue;}
+    if(inStr&&(c==='\n'||c==='\r')){cleaned+=' ';continue;}  // 换行→空格
+    if(inStr&&c==='\t'){cleaned+=' ';continue;}              // 制表→空格
+    cleaned+=c;
+  }
+  s=cleaned;
+
+  // 第3步：再次修尾逗号（清洗后可能新暴露）
+  s=s.replace(/,\s*([}\]])/g,'$1');
+
+  // 尝试解析；失败则最后手段：清除所有控制字符再试
   try{ return JSON.parse(s); }
-  catch(e){ throw new Error('JSON解析失败：'+e.message+'\n片段：'+s.slice(-200)); }
+  catch(e1){
+    const s2=s.replace(/[\x00-\x1F\x7F]/g,' ').replace(/,\s*([}\]])/g,'$1');
+    try{ return JSON.parse(s2); }
+    catch(e2){ throw new Error('JSON解析失败：'+e2.message+'\n片段：'+s.slice(0,200)+'…'+s.slice(-200)); }
+  }
 }
 
 // ══════════════════════════════════════
@@ -456,69 +482,72 @@ async function generate(){
     if(isMorning){
       prompt=`你是"迪拜今日报"主编。今天${dateFull}，迪拜早间。
 
-请立即调用 web_search 工具，分别搜索：
-1. "Dubai UAE morning news today ${dubaiNow().getFullYear()}"
-2. "迪拜 新闻 今日 ${dubaiNow().getMonth()+1}月"
-3. "Dubai weather today"
-4. "Dubai business investment opportunity ${dubaiNow().getFullYear()}"
-5. "UAE economy real estate jobs today"
+请调用 web_search 工具搜索以下内容：
+1. "Dubai UAE news today ${dubaiNow().getFullYear()}"
+2. "Dubai weather today"
+3. "Dubai business opportunity ${dubaiNow().getFullYear()}"
 
-基于搜索到的真实内容，生成早间报纸。内容面向迪拜华人，语言简练实用。
+基于搜索到的真实内容生成早间报纸，内容面向迪拜华人，语言简练实用。
+新闻来源：Gulf News / Khaleej Times / The National / WAM / Reuters / Bloomberg 等。
 
-新闻来源必须真实：Gulf News / Khaleej Times / The National / WAM / Reuters / BBC / Bloomberg / CNN / AP 等。
+【JSON格式铁律】
+- 只输出纯JSON，不加代码块，不加任何说明文字
+- 所有字符串值必须在同一行，绝对不能换行
+- 字符串内不能出现英文双引号（"）
+- 每个字段值简短精炼，body最多80字，desc最多60字
+- 严格按照下方结构，不能增减字段
 
-只返回纯 JSON（不加代码块、不加任何说明文字）：
 {
   "date": "${dateStr}",
   "dateEn": "${dateEn}",
   "edition": "morning",
   "weather": { "temp": "38", "condition": "晴间多云", "humidity": "55", "uv": "极强" },
   "headlines": [
-    { "category": "全球", "title": "标题（16字内）", "body": "正文2-3句含具体数字细节约80字", "source": "Reuters" },
-    { "category": "迪拜", "title": "标题（16字内）", "body": "正文约80字", "source": "Gulf News" },
-    { "category": "经济", "title": "标题（16字内）", "body": "正文约80字", "source": "Bloomberg" }
+    { "category": "全球", "title": "标题16字内", "body": "正文约80字含具体数字", "source": "Reuters" },
+    { "category": "迪拜", "title": "标题16字内", "body": "正文约80字", "source": "Gulf News" },
+    { "category": "经济", "title": "标题16字内", "body": "正文约80字", "source": "Bloomberg" }
   ],
-  "insight": "今日锐评：对当前迪拜或全球最重要趋势的观点评论，有具体判断，约120字",
+  "insight": "今日锐评约120字，有具体判断和数据支撑",
   "opportunities": [
-    { "tag": "房产", "title": "机会标题（12字内）", "desc": "具体可操作的赚钱机会说明，60字，包含数字和时间窗口" },
-    { "tag": "创业", "title": "机会标题", "desc": "说明约60字" },
-    { "tag": "投资", "title": "机会标题", "desc": "说明约60字" }
+    { "tag": "房产", "title": "机会标题12字内", "desc": "可操作说明约60字含数字" },
+    { "tag": "创业", "title": "机会标题12字内", "desc": "说明约60字" },
+    { "tag": "投资", "title": "机会标题12字内", "desc": "说明约60字" }
   ]
 }`;
     } else {
       prompt=`你是"迪拜今日报"主编。今天${dateFull}，迪拜傍晚。
 
-请立即调用 web_search 工具，分别搜索：
-1. "Dubai UAE news this afternoon today ${dubaiNow().getFullYear()}"
-2. "迪拜 新闻 下午 ${dubaiNow().getMonth()+1}月${dubaiNow().getDate()}日"
-3. "Dubai weather evening today"
-4. "${topic.en} Dubai guide ${dubaiNow().getFullYear()}"
-5. "Dubai gold price oil USD AED rate today"
+请调用 web_search 工具搜索以下内容：
+1. "Dubai UAE news today ${dubaiNow().getFullYear()}"
+2. "Dubai weather evening today"
+3. "${topic.en} Dubai ${dubaiNow().getFullYear()}"
+4. "Dubai gold price oil USD AED rate today"
 
-注意：晚间新闻应优先选取下午最新发展，避免重复早上已被广泛报道的新闻，优先选择社会民生、商业动态方向。
+晚间新闻优先选取社会民生、商业动态方向，避免重复早间已报道内容。
 
-只返回纯 JSON（不加代码块、不加任何说明文字）：
+【JSON格式铁律】
+- 只输出纯JSON，不加代码块，不加任何说明文字
+- 所有字符串值必须在同一行，绝对不能换行
+- 字符串内不能出现英文双引号（"）
+- 每个字段值简短精炼，body最多80字，steps每条最多40字
+- 严格按照下方结构，不能增减字段
+
 {
   "date": "${dateStr}",
   "dateEn": "${dateEn}",
   "edition": "evening",
   "weather": { "temp": "33", "condition": "晴", "humidity": "60", "uv": "低" },
   "headlines": [
-    { "category": "迪拜", "title": "标题（16字内）", "body": "正文约80字，选下午最新进展", "source": "Khaleej Times" },
-    { "category": "全球", "title": "标题（16字内）", "body": "正文约80字", "source": "BBC" },
-    { "category": "商业", "title": "标题（16字内）", "body": "正文约80字", "source": "The National" }
+    { "category": "迪拜", "title": "标题16字内", "body": "正文约80字选下午最新进展", "source": "Khaleej Times" },
+    { "category": "全球", "title": "标题16字内", "body": "正文约80字", "source": "BBC" },
+    { "category": "商业", "title": "标题16字内", "body": "正文约80字", "source": "The National" }
   ],
   "howto": {
     "question": "${topic.q}",
-    "steps": [
-      "第一步：具体操作（含机构名/网址/地点）",
-      "第二步：...",
-      "第三步：...",
-      "第四步：..."
-    ],
-    "insider_tip": "内部小贴士：华人容易踩的坑或者鲜为人知的捷径，约60字"
+    "steps": ["第一步：具体操作含机构名或地点", "第二步：具体操作", "第三步：具体操作", "第四步：具体操作"],
+    "insider_tip": "华人常踩的坑或鲜为人知的捷径约50字"
   },
-  "market": { "gold": "345 AED/g", "usd_aed": "3.67", "oil": "82 USD/桶", "note": "数据来源与时间" }
+  "market": { "gold": "345 AED/g", "usd_aed": "3.67", "oil": "82 USD/桶" }
 }`;
     }
 
@@ -643,7 +672,7 @@ function renderCards(d){
         <div class="mkt-item"><div class="mkt-label">USD/AED</div><div class="mkt-val">${mkt.usd_aed||'—'}</div><div class="mkt-sub">汇率</div></div>
         <div class="mkt-item"><div class="mkt-label">原油</div><div class="mkt-val">${mkt.oil||'—'}</div><div class="mkt-sub">Brent</div></div>
       </div>
-      ${mkt.note?`<div style="padding:0 18px 10px;font-size:9px;color:var(--ink3);font-style:italic">${mkt.note}</div>`:''}`;
+      `;
   }
 
   c2.innerHTML=`
